@@ -9,6 +9,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -335,7 +340,48 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
         drive(PI / 2, 8, .5);
     }
-
+    
+    public float getHeading(){
+        Orientation angles = boat.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        float heading = angles.firstAngle;
+        float fakeHeading = heading - rotate_angle;
+        return fakeHeading;
+    }
+    
+    public void rotate(double angle) {
+        double threshold = 2;
+        double power = 0;
+        double angleDist = 0;
+        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        
+        while ((Math.get.abs(angle - getHeading()) > threshold) || ((Math.get.abs(angle) > 180 - threshold) && (Math.get.abs(Math.get.abs(angle) - Math.get.abs(getHeading())) > threshold )) {
+        angleDist =  Math.abs(angle - getHeading());
+        if (angleDist > 180) {
+            angleDist = 360 - angleDist;
+        }
+        power = ((.3 * (angleDist / 180)) + 0.05);
+        
+        //TURN COUNTER CLOCKWISE
+            if (angle - getHeading() > 0 || angle - getHeading() < -180) {
+                 boat.back_left_motor.setPower(-1*power);
+                 boat.front_right_motor.setPower(power);
+                 boat.front_left_motor.setPower(-1*power);
+                 boat.back_right_motor.setPower(power);
+            } else {
+        //TURN CLOCKWISE
+                 boat.back_left_motor.setPower(power);
+                 boat.front_right_motor.setPower(-1*power);
+                 boat.front_left_motor.setPower(power);
+                 boat.back_right_motor.setPower(-1*power);
+            }
+        }
+        reset_drive();
+        busy();
+    }
+    
     public void outtake (){
         drive (PI/2, 10, .4);
         sleep(500);
