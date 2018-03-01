@@ -41,6 +41,9 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
     final float values[] = hsvValues;
     final double scale_factor = 255;
     @Override
+    
+    double rotateAngle = 0;
+    
     public void runOpMode() {
 
         telemetry.addData(">", "DONT PRESS THE PLAY BUTTON");
@@ -357,6 +360,8 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         
+        angle = convertAngle(angle);
+        
         while ((Math.get.abs(angle - getHeading()) > threshold) || ((Math.get.abs(angle) > 180 - threshold) && (Math.get.abs(Math.get.abs(angle) - Math.get.abs(getHeading())) > threshold )) {
         angleDist =  Math.abs(angle - getHeading());
         if (angleDist > 180) {
@@ -381,6 +386,27 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         reset_drive();
         busy();
     }
+    
+    public double convertAngle(double angle) {
+        
+        rotateAngle = rotateAngle + angle;
+        
+        if (rotateAngle > 180) {
+         rotateAngle = rotateAngle - 360;
+        } else if (rotateAngle < -180) {
+         rotateAngle = rotateAngle + 360;   
+        }
+        
+        angle = angle + rotateAngle;
+        
+        if (angle > 180) {
+         angle = angle - 360;
+        } else if (angle < -180) {
+         angle = angle + 360;   
+        }
+        return angle;
+    }
+   
     
     public void outtake (){
         drive (PI/2, 10, .4);
