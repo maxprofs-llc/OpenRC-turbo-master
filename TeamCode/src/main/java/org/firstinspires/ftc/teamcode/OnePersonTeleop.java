@@ -26,7 +26,7 @@ public class OnePersonTeleop extends LinearOpMode {
     Boolean gamepad2_right_bumper_toggle = false;
     Boolean killUrself = false;
     Boolean doKillUrself = true;
-//wj
+//:)
     /////////////////////////////
    /* DRIVE RELATED VARIABLES */
     /////////////////////////////
