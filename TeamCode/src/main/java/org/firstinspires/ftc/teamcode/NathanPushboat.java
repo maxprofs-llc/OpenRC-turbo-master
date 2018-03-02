@@ -55,7 +55,7 @@ public class NathanPushboat
     //GLYPH//
     public DcMotor glyph_flipper = null; //(9, 3)
     public Servo glyph_aligner = null; //(9, 0)
-    // public Servo glyph_grabber = null; //(9, 1)
+    public Servo glyph_grabber = null; //(9, 1)
     public AnalogInput armPotentiometer = null;
 
     //JEWEL//
@@ -103,7 +103,7 @@ public class NathanPushboat
         //GLYPH//
         glyph_flipper = hwMap.dcMotor.get("glyph_flipper"); //positive power increases pot position
         glyph_aligner = hwMap.servo.get("glyph_aligner");
-        //glyph_grabber = hwMap.servo.get("glyph_grabber");
+        glyph_grabber = hwMap.servo.get("glyph_grabber");
         armPotentiometer = hwMap.analogInput.get("armPotentiometer");
 
         //JEWEL//

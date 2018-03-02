@@ -63,7 +63,7 @@ public class TestShovel extends LinearOpMode {
     @Override
     public void runOpMode() {
         boat.init(hardwareMap);
-        servo_angle = boat.relic_flop.getPosition();
+        servo_angle = boat.glyph_aligner.getPosition();
         servo_angle2 = boat.relic_noose.getPosition();
         //boat.glyph_aligner.setPosition(boat.glyph_aligner.getPosition());
 
@@ -78,23 +78,23 @@ public class TestShovel extends LinearOpMode {
         while(!opModeIsActive()){
             // intake_runToPosition(1.2,.5);
             // boat.glyph_grabber.setPosition(1);
-            //boat.glyph_aligner.setPosition(.81);
+            boat.glyph_aligner.setPosition(.5);
             firstError = boat.armPotentiometer.getVoltage();
 
 
         }
         while(opModeIsActive()){
             // boat.jewel_arm.setPosition(56.0/180.0);
-            //servo_angle = servoAdjustRelicArm(servo_angle);
+            servo_angle = servoAdjustAligner(servo_angle);
             //glyph_flipper_adjust();
-            //telemetry.addData(">", "Current Angle: " + boat.glyph_aligner.getPosition());
+            telemetry.addData(">", "Current Angle: " + boat.glyph_aligner.getPosition());
             //intake(); // this encompasses all intake functions necessary
             getPotValues();
             //Conveyor();
-            intakeSimple();
+            //intakeSimple();
             //drive();
             // testMotor();
-            glyph_flip();
+            //glyph_flip();
             //glyph_flip_low();
             //glyph_flip_high();
             if(gamepad1.a){
@@ -102,17 +102,16 @@ public class TestShovel extends LinearOpMode {
             if (gamepad1.b){
                 boat.relic_noose.setPosition(1);          }
 
-
-            relicGrab();
+            //relicGrab();
             //drive();
             testMotor();
             // testMotor();
             //   glyph_flip();
             // glyph_flipper_adjust();
 
-            Conveyor();
-            telemetry.addData(">", "flop angle " + boat.relic_flop.getPosition());
-            telemetry.addData(">", "noose angle " + boat.relic_noose.getPosition());
+            //Conveyor();
+//            telemetry.addData(">", "flop angle " + boat.relic_flop.getPosition());
+//            telemetry.addData(">", "noose angle " + boat.relic_noose.getPosition());
             telemetry.update();//THIS GOES AT THE END
         }
     }
@@ -665,14 +664,14 @@ public class TestShovel extends LinearOpMode {
     public double servoAdjustAligner(double servo_angle) {
 
         if (gamepad1.right_trigger>.3) { //CONFLICTING CONTROL KEYS
-            servo_angle = boat.glyph_aligner.getPosition() - 3.0 / 180.0;
+            servo_angle = boat.glyph_aligner.getPosition() - 1.0 / 180.0;
             // boat.glyph_aligner.setPosition(151.0/180.0);
 
             boat.glyph_aligner.setPosition(servo_angle);
         }
 
         if (gamepad1.left_trigger>.3) {
-            servo_angle = boat.glyph_aligner.getPosition() + 3.0 / 180.0;
+            servo_angle = boat.glyph_aligner.getPosition() + 1.0 / 180.0;
             //boat.glyph_aligner.setPosition(39.0/180.0);
             boat.glyph_aligner.setPosition(servo_angle);
         }
