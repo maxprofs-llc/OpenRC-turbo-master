@@ -109,6 +109,7 @@ public class NathanPushboat
         //JEWEL//
         jewel_arm = hwMap.servo.get("jewel_arm");//.2 for STRAIGHT UP, .76 JEWEL DOWN
         color_sensor = hwMap.get(ColorSensor.class, "color_sensor");
+        distance_sensor = hwMap.get(DistanceSensor.class,"color_sensor");
 
 //        //RELIC//
         relic_extender  = hwMap.dcMotor.get("relic_extender");

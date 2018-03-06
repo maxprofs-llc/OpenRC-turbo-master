@@ -9,10 +9,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@TeleOp(name="OnePersonTeleop", group="Pushbot")
-public class OnePersonTeleop extends LinearOpMode {
+@TeleOp(name="ExpPersonTeleop", group="Pushbot")
+public class ExpOnePersonTeleop extends LinearOpMode {
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
     //////////////////////
@@ -35,9 +36,15 @@ public class OnePersonTeleop extends LinearOpMode {
     boolean switchServo = false;
     boolean pButtonSwitch = false;
     boolean cButtonSwitch = false;
-    static final double SERVO_SWITCH_CLOSE = 165.0/180.0;
+    static final double SERVO_SWITCH_CLOSE = .35;//165.0/180.0;
     static final double SERVO_SWITCH_OPEN = 0.0/180.0;
 
+
+    boolean switchServo2 = false;
+    boolean pButtonSwitch2 = false;
+    boolean cButtonSwitch2 = false;
+    static final double SERVO_SWITCH_CLOSE2 = .65;
+    static final double SERVO_SWITCH_OPEN2 = .39;
 
     float stick_x = 0;
     float stick_y = 0;
@@ -60,7 +67,9 @@ public class OnePersonTeleop extends LinearOpMode {
     //////////////////////////////////
 
     double switchangle = .52;
+    double switchangle2 = .39; //for grabber
     double glyph_flip_last_press_time = 0;
+    double glyph_grab_last_press_time2 = 0;
     double servo_adjust_last_time = 0;
     double glyph_flipper_last_time = 0;
     double glyph_flip_stomp_last_time = 0;
@@ -91,21 +100,23 @@ public class OnePersonTeleop extends LinearOpMode {
         while(!opModeIsActive()){
             //boat.jewel_arm.setPosition(56.0/180.0);
             boat.relic_flop.setPosition(.85);// keep it out of the way of the shovel
-            boat.glyph_aligner.setPosition(.08);
-            boat.jewel_arm.setPosition(0);
-            boat.glyph_grabber.setPosition(.39);
+            boat.glyph_aligner.setPosition(.2);
+            boat.jewel_arm.setPosition(0); //should be 0
+            boat.glyph_grabber.setPosition(.65);
 
         }
         while(opModeIsActive()){
             //boat.jewel_arm.setPosition(0);
             if (killUrself == false) {
-                boat.winch.setPower(-.5);
+                //boat.winch.setPower(-.2);
             } else {
                 boat.winch.setPower(0);
             }
             //Relic();
             jewel_arm();
             telemetry.addData(">", "Current Angle: " + boat.glyph_aligner.getPosition());
+            telemetry.addData("Distance (mm)",
+                    String.format( "%.02f", boat.distance_sensor.getDistance(DistanceUnit.MM)));
             intake(); // this encompasses all intake functions necessary
             getPotValues();
             glyph_flip();
@@ -127,7 +138,7 @@ public class OnePersonTeleop extends LinearOpMode {
         stick_x = stick_x /2;
         stick_y = stick_y /2;
 
-        if(gamepad1.right_trigger > 0.5 && gamepad1.left_trigger > 0.5 && gamepad1.start) {
+        if(gamepad1.back) {
             setCurrentHeadingToZero();
         }
 
@@ -145,7 +156,7 @@ public class OnePersonTeleop extends LinearOpMode {
             theta = (Math.atan2(stick_y, stick_x) - gyroAngle) - (Math.PI / 2);
             Px = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta + Math.PI / 4));
             Py = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta - Math.PI / 4));
-        } else if (gamepad1.right_trigger > 0.5) {
+        } else if (gamepad1.right_trigger > 0.5 && gamepad1.left_trigger<.2) {
             //Runs Px Py independent of gyro (old drive) -> DOUBLE SPEED GYRO
             stick_x = stick_x * 2;
             stick_y = stick_y * 2;
@@ -166,7 +177,7 @@ public class OnePersonTeleop extends LinearOpMode {
             if (Px == 0 && Py == 0) {
                 Protate = gamepad1.right_stick_x * .4;
             } else {
-                Protate = gamepad1.right_stick_x * 3 / 2 * 0.42;
+                Protate = gamepad1.right_stick_x * 3 / 2 * 0.2; //* 3 / 2 * 0.42
                 Px = Px / 3 * 2;
                 Py = Py / 3 * 2;
             }
@@ -178,7 +189,7 @@ public class OnePersonTeleop extends LinearOpMode {
         rotateToAngle();
 
         // cardinal directions
-        if (gamepad1.right_bumper) {
+        if (gamepad1.start) {
             if (gamepad1.dpad_left) {
                 Protate = -0.15;
             } else if (gamepad1.dpad_right) {
@@ -223,17 +234,17 @@ public class OnePersonTeleop extends LinearOpMode {
         int threshold = 1;
         double desiredRunTime = 5000;
         double incorrectHeading = getHeading();
-        if (gamepad1.a) {
-            moveAngle = 180;
-            currentTimeForAngle = runtime.milliseconds();
-            // } else if (gamepad1.x) {
-            // moveAngle = 90;
-            //    currentTimeForAngle = runtime.milliseconds();
-            //  } else if (gamepad1.b) {
-            //    moveAngle = -90;
-            //  currentTimeForAngle = runtime.milliseconds();
-        }
-        else if (gamepad1.y) {
+//        if (gamepad1.a) {
+//            moveAngle = 180;
+//            currentTimeForAngle = runtime.milliseconds();
+//            // } else if (gamepad1.x) {
+//            // moveAngle = 90;
+//            //    currentTimeForAngle = runtime.milliseconds();
+//            //  } else if (gamepad1.b) {
+//            //    moveAngle = -90;
+//            //  currentTimeForAngle = runtime.milliseconds();
+//        }
+        if (gamepad1.left_bumper) {
             moveAngle = 0;
             currentTimeForAngle = runtime.milliseconds();
         }
@@ -322,28 +333,28 @@ public class OnePersonTeleop extends LinearOpMode {
     //////////////////////////////////
     public void glyph_flip(){ //Includes toggle and calling all the glyph_flip functions
         double desiredTime = 1000;
-        if(gamepad2.y && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_high();
+        if(gamepad1.y && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_high();
             glyph_flip_last_press_time = runtime.milliseconds();
             gamepad2_y_toggle = toggle(gamepad2_y_toggle);
             gamepad2_a_toggle = false;
             gamepad2_b_toggle = false;
             gamepad2_x_toggle = false;
         }
-        else if(gamepad2.a && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_low();
+        else if(gamepad1.a && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_low();
             glyph_flip_last_press_time = runtime.milliseconds();
             gamepad2_a_toggle = toggle(gamepad2_a_toggle);
             gamepad2_y_toggle = false;
             gamepad2_b_toggle = false;
             gamepad2_x_toggle = false;
         }
-        else if(gamepad2.b && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_hover();
+        else if(gamepad1.b && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_hover();
             glyph_flip_last_press_time = runtime.milliseconds();
             gamepad2_b_toggle = toggle(gamepad2_b_toggle);
             gamepad2_y_toggle = false;
             gamepad2_a_toggle = false;
             gamepad2_x_toggle = false;
         }
-        else if(gamepad2.x && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_stomp();
+        else if(gamepad1.x && runtime.milliseconds() > (glyph_flip_last_press_time + desiredTime)){ //Used for glyph_flip_stomp();
             glyph_flip_last_press_time = runtime.milliseconds();
             gamepad2_x_toggle = toggle(gamepad2_x_toggle);
             gamepad2_y_toggle = false;
@@ -382,7 +393,7 @@ public class OnePersonTeleop extends LinearOpMode {
     public void glyph_flipper_runToPosition(double desiredPosition, double coefficient){ //Replace later with Josh's PID loop
         double desiredTime = 20;
         double potValue = boat.armPotentiometer.getVoltage();
-        double kp = 1.0;   //.5              // proportional konstant
+        double kp = .8;   //.5              // proportional konstant
         double ki = 0.345;    //.345         //konstant of integration
         double kd = 0.2;     //.2 //1.7 and 3.0?      //konstant of derivation
         double current = 0;        //value to be sent to shooter motors
@@ -510,21 +521,56 @@ public class OnePersonTeleop extends LinearOpMode {
     }
 
     public void shovelFlip() {
+        pButtonSwitch2 = cButtonSwitch2;
+        cButtonSwitch2 = gamepad1.right_bumper;
+//        if(gamepad1.right_bumper) {
+//            gamepad2_a_toggle = false;
+//            gamepad2_x_toggle = false;
+//            gamepad2_y_toggle = false;
+//
+//            if (cButtonSwitch2 && !pButtonSwitch2) {
+//                switchServo2 = switchServo2 ? false : true;
+//            }
+//
+//            if (switchServo2) {
+//                boat.glyph_grabber.setPosition(SERVO_SWITCH_OPEN2);
+//            } else if (!switchServo2) {
+//                boat.glyph_grabber.setPosition(SERVO_SWITCH_CLOSE2);
+//
+//            }
+//        }
+        double desiredTime = 300;
+
+        if (gamepad1.right_bumper && runtime.milliseconds() > (glyph_grab_last_press_time2 + desiredTime)){ //glyph flicking
+            gamepad2_a_toggle = false;
+            gamepad2_x_toggle = false;
+            gamepad2_y_toggle = false;
+
+            if (switchangle2 == .39){
+                boat.glyph_grabber.setPosition(.65);
+                switchangle2 = .65;
+            }
+            else if (switchangle2 == .65){
+                boat.glyph_grabber.setPosition(.39);
+                switchangle2 = .39;
+            }
+            glyph_grab_last_press_time2 = runtime.milliseconds();
+
+        }
 
 
-        if(gamepad2.dpad_left){
-            boat.glyph_grabber.setPosition(.39);
-        }
-        if(gamepad2.dpad_right){
-            boat.glyph_grabber.setPosition(65);
-        }
+
+
         if (gamepad2_a_toggle == true) {
             //toggle
-            glyph_flipper_runToPosition(2.5, .3);//old glyph flip high thing //.5
+            glyph_flipper_runToPosition(2.29, .3);//old glyph flip high thing //.5
             if (boat.armPotentiometer.getVoltage() > .50) {
-                boat.glyph_aligner.setPosition(.52); //.99
+                boat.glyph_aligner.setPosition(.54); //.99
             }
-            //boat.glyph_grabber.setPosition(.39);
+            if (boat.armPotentiometer.getVoltage() > 2.0) {
+                boat.glyph_grabber.setPosition(.24);
+            }
+            switchangle2 = .39;
 
 
         }
@@ -532,16 +578,30 @@ public class OnePersonTeleop extends LinearOpMode {
         if (gamepad2_y_toggle == true) {
 //            boat.left_intake.setPower(-.3);
 //            boat.right_intake.setPower(-.3);
-            glyph_flipper_runToPosition(.438, .50); // OLD ONE FROM FEB 15 THAT WORKS
+            glyph_flipper_runToPosition(.30, .7); // OLD ONE FROM FEB 15 THAT WORKS //.438 SHOULD BE RIGHT 3/5
             //Playglyph_flipper_runToPosition(.25, 1.0); // OLD ONE FROM FEB 15 THAT WORKS
 
 
-            if (boat.armPotentiometer.getVoltage()< 2.40) {
-                //boat.glyph_grabber.setPosition(.65);
+                boat.glyph_grabber.setPosition(.65);
+                switchangle2 = .65;
+            if (boat.armPotentiometer.getVoltage()<1.7){
+                boat.glyph_aligner.setPosition(.15);                // .2 3/5 march
+            } else if (boat.armPotentiometer.getVoltage()> 1.9){
+                boat.glyph_aligner.setPosition(.7); //.99
+
             }
-            if (boat.armPotentiometer.getVoltage()<2.0){
-                boat.glyph_aligner.setPosition(.08);                // .15, 9.0 was for hover
-            }
+
+//            if (boat.armPotentiometer.getVoltage()< 1.90) {
+//                boat.glyph_grabber.setPosition(.65);
+//                switchangle2 = .65;
+//            }
+//            if (boat.armPotentiometer.getVoltage()<1.7){
+//                boat.glyph_aligner.setPosition(.08);                // .15, 9.0 was for hover
+//            }
+//            else if (boat.armPotentiometer.getVoltage()>2.0){
+//                boat.glyph_aligner.setPosition(.7);         //NEED TO FIND THIS       // .15, 9.0 was for hover
+//
+//            }
 
 
 //            if (boat.armPotentiometer.getVoltage() < 1.8){
@@ -560,7 +620,7 @@ public class OnePersonTeleop extends LinearOpMode {
 
         }
 
-        double desiredTime = 100;
+        //double desiredTime = 100;
 
         if (gamepad2.b == true && runtime.milliseconds() > (glyph_grab_last_press_time + desiredTime)){ //glyph flicking
             gamepad2_a_toggle = false;
@@ -585,7 +645,8 @@ public class OnePersonTeleop extends LinearOpMode {
 
             // .15, 9.0 was for hover
             if (boat.armPotentiometer.getVoltage()< 2.40) {
-                //boat.glyph_grabber.setPosition(.65);
+                boat.glyph_grabber.setPosition(.65);
+                switchangle2 = .65;
             }
             if (boat.armPotentiometer.getVoltage()<2.0){
                 boat.glyph_aligner.setPosition(.0);                // .15, 9.0 was for hover
@@ -593,7 +654,7 @@ public class OnePersonTeleop extends LinearOpMode {
 
 
             //Playglyph_flipper_runToPosition(.20, .9); //.44
-            glyph_flipper_runToPosition(.212, .60);//OLD ONE FROM FEB 15 THAT WORKS//old glyph flip high thing //used to be .24 2/12
+            glyph_flipper_runToPosition(.212, .8);//OLD ONE FROM FEB 15 THAT WORKS//old glyph flip high thing //used to be .24 2/12
 
 
         }
@@ -660,7 +721,7 @@ public class OnePersonTeleop extends LinearOpMode {
 //       intake_middle();
 //        intake_low();
 //        intakeAuto();
-        Conveyor();
+        //Conveyor();
         //outtake();
         // winch();
 
@@ -681,13 +742,12 @@ public class OnePersonTeleop extends LinearOpMode {
     }
 
     public void intakeSimple() {
-        if (gamepad2.dpad_up) { //intake
+        if (gamepad1.left_trigger>.2 && gamepad1.right_trigger>.2) { //intake
             boat.right_intake.setPower(1);
             boat.left_intake.setPower(1);
         }
-        else if (boat.armPotentiometer.getVoltage() > 1.5) {
 
-            if (gamepad2.dpad_down) {
+           else if (gamepad1.left_trigger>.2) {
                 boat.right_intake.setPower(-1);
                 boat.left_intake.setPower(-1);
             } else {
@@ -695,15 +755,7 @@ public class OnePersonTeleop extends LinearOpMode {
                 boat.left_intake.setPower(0);
 
             }
-        } else {
 
-
-
-            boat.right_intake.setPower(0);
-            boat.left_intake.setPower(0);
-
-
-        }
     }
 
 
@@ -802,8 +854,8 @@ public class OnePersonTeleop extends LinearOpMode {
 
         //deciding the state if the switch servo is at pos 1 || 0
         pButtonSwitch = cButtonSwitch;
-        cButtonSwitch = gamepad1.left_bumper;
-        if(gamepad1.left_bumper && !gamepad1.dpad_up && !gamepad1.dpad_down) {
+        cButtonSwitch = gamepad2.left_bumper;
+        if(gamepad2.left_bumper && !gamepad2.dpad_up && !gamepad2.dpad_down) {
             if (cButtonSwitch && !pButtonSwitch) {
                 switchServo = switchServo ? false : true;
             }
@@ -815,11 +867,11 @@ public class OnePersonTeleop extends LinearOpMode {
 
             }
         }
-        else if(gamepad1.right_bumper && gamepad1.dpad_up){
+        else if(gamepad2.right_bumper && gamepad2.dpad_up){
             boat.jewel_arm.setPosition(boat.jewel_arm.getPosition() - 3/180.0);
 
         }
-        else if(gamepad1.right_bumper && gamepad1.dpad_down){
+        else if(gamepad2.right_bumper && gamepad2.dpad_down){
             boat.jewel_arm.setPosition(boat.jewel_arm.getPosition() + 3/180.0);
         }
         else{

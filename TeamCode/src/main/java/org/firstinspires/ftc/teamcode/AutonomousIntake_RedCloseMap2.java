@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -40,10 +41,8 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
     float hsvValues[] = {0F, 0F, 0F};
     final float values[] = hsvValues;
     final double scale_factor = 255;
-    @Override
-    
     double rotateAngle = 0;
-    
+    @Override
     public void runOpMode() {
 
         telemetry.addData(">", "DONT PRESS THE PLAY BUTTON");
@@ -54,7 +53,7 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         reset_drive();
-        AutoTransitioner.transitionOnStop(this, "AdwithTeleop");
+        //AutoTransitioner.transitionOnStop(this, "AdwithTeleop");
         telemetry.addData(">", "~ good ~");
         telemetry.update();
         //correctCryptoSlot = detect_init_column();
@@ -70,10 +69,13 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
         telemetry.addData(">", "~ good ~");
         telemetry.update();
-        boat.jewel_arm.setPosition(0);
+        //boat.jewel_arm.setPosition(0);
+        boat.jewel_arm.setPosition(0.35);
+
         //boat.relic_flop.setPosition(.83); //was .83
-        boat.relic_noose.setPosition(0);
         while(opModeIsActive() == false){
+            boat.relic_noose.setPosition(0);
+
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
             telemetry.addData("VuMark", "%s visible", vuMark);
             if (vuMark == RelicRecoveryVuMark.RIGHT) {
@@ -83,12 +85,28 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
             } else if (vuMark == RelicRecoveryVuMark.LEFT) {
                 correctCryptoSlot = "Left";
             }
+            telemetry.addData("Distance (mm)",
+                    String.format( "%.02f", boat.distance_sensor.getDistance(DistanceUnit.MM)));
             telemetry.update();
+
         }
 
 //        if (correctCryptoSlot == "UNKNOWN"){
 //            correctCryptoSlot = "Right";
 //        }
+
+        autoDetectColumn();
+        drive(PI, 5.0, .5);
+        rotate_arc(-PI/1.6 + PI *10/180, .7);
+        //boat.winch.setPower(-.2); //set winch
+        boat.relic_noose.setPosition(1.0);
+        boat.glyph_aligner.setPosition(.08);
+        drive(-PI/2,5,1);
+
+        drive(PI/2,5,1);
+        pushMe();
+        drive(-PI/2,6,.5);
+        sleep(10000);
         int success = 1;
         for(int i = 0; i < 3 && success == 1; i++){
             success = detect_color("RED", "CLOSE");
@@ -105,7 +123,7 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
                 insanity = 16.0;
                 break;
             case "Left":
-                distance = 40.0 + 5.0; //works add 3 after turn //works 2/15
+                distance = 40.0 + 8.0; //works add 3 after turn //works 2/15
                 shift = -17.0;//works
                 center = 10.0;
                 insanity = 8.0;
@@ -142,39 +160,44 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 //sleep(100000);
 
         drive(PI/2, distance, .7);
-        boat.relic_noose.setPosition(1);
         //boat.relic_flop.setPosition(.71); //open up the relic arm //.71
-        sleep(500);
-        boat.winch.setPower(-.5); //set winch
-        boat.glyph_aligner.setPosition(.4);
+
         //drive(PI/2,-32,.7);
         sleep(100);
 
-        drive(PI, 2.0, .5);
-        drive(PI, 2.0, .5);
-        drive(PI, 2.0, .5);
+        //drive(PI, 2.0, .5);
+        drive(PI, 4.0, .5);
+        //drive(PI, 2.0, .5);
 
 
         sleep(100);
+        autoDetectColumn();
         rotate_arc(-PI/1.6 + PI *10/180, .7);
-        drive(PI/2,5,.7);
+        boat.winch.setPower(-.2); //set winch
+        boat.relic_noose.setPosition(1);
+        boat.glyph_aligner.setPosition(.08);
+        drive(-PI/2,10,1);
 
-        if (correctCryptoSlot == "Left"){
-            boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            drive(0, -3.0, .6); //3.5 //maybe change to 1.5 worked on 2/14
-            //drive(PI, 2.0, 1.0); //3.5 //maybe change to 1.5 worked on 2/14
-            //drive(PI, 2.0, 1.0);
-            //2.5 feb 15 worked ok but was off a little
-            boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
+        drive(PI/2,10,1);
+        drive(PI/2,5,.5);
+        pushMe();
+
+//        if (correctCryptoSlot == "Left"){
+////            boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+////            boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+////            boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+////            boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//            drive(0, -3.0, .6); //3.5 //maybe change to 1.5 worked on 2/14
+//            //drive(PI, 2.0, 1.0); //3.5 //maybe change to 1.5 worked on 2/14
+//            //drive(PI, 2.0, 1.0);
+//            //2.5 feb 15 worked ok but was off a little
+////            boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+////            boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+////            boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+////            boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        }
         //sleep(1500);
-        diagonal();
+        //diagonal();
         //boat.glyph_aligner.setPosition(.99);
 //        autoGlyphInsanity(insanity, center);
 
@@ -240,6 +263,38 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         drive(PI/2, 13, .7);
 
         diagonal();
+
+    }
+
+    public void autoDetectColumn(){
+        boat.jewel_arm.setPosition(.35);
+        double column_distance = boat.distance_sensor.getDistance(DistanceUnit.MM);
+        double target_distance = 160.0; //this distance is how far you want the distance sensor to get to the column
+        while(Math.abs(column_distance - target_distance)>2.0 && opModeIsActive()){
+            boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if (column_distance-target_distance < 0) {
+                boat.back_left_motor.setPower(.2);
+                boat.front_right_motor.setPower(.2);
+                boat.front_left_motor.setPower(.2);
+                boat.back_right_motor.setPower(.2);
+            }
+            else if (column_distance-target_distance > 0){
+                boat.back_left_motor.setPower(-.2);
+                boat.front_right_motor.setPower(-.2);
+                boat.front_left_motor.setPower(-.2);
+                boat.back_right_motor.setPower(-.2);
+            }
+            column_distance = boat.distance_sensor.getDistance(DistanceUnit.MM);
+        }
+        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.jewel_arm.setPosition(0);
+
 
     }
 
@@ -330,12 +385,20 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         busy();
     }
 
+    public void pushMe(){
+        boat.right_intake.setPower(.25);
+        boat.left_intake.setPower(.25);
+        drive(-PI / 2, 3.0, .3);
+        sleep(300);
+        drive(0, 4.0, .5);
+        drive(PI / 2, 8, .5);
+    }
     public void diagonal(){
         boat.right_intake.setPower(.25);
         boat.left_intake.setPower(.25);
         drive(-PI / 2, 2.0, .3);
-        boat.right_intake.setPower(0.1);
-        boat.left_intake.setPower(0.1);
+        boat.right_intake.setPower(0.0);
+        boat.left_intake.setPower(0.0);
         rotate_arc(-PI/8, .2); // try a bigger angle? used to be PI/8
         drive(-PI/2, 1,1);
         rotate_arc(PI/8, .2);
@@ -344,68 +407,68 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         drive(PI / 2, 8, .5);
     }
     
-    public float getHeading(){
-        Orientation angles = boat.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        float heading = angles.firstAngle;
-        float fakeHeading = heading - rotate_angle;
-        return fakeHeading;
-    }
-    
-    public void rotate(double angle) {
-        double threshold = 2;
-        double power = 0;
-        double angleDist = 0;
-        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        
-        angle = convertAngle(angle);
-        
-        while ((Math.get.abs(angle - getHeading()) > threshold) || ((Math.get.abs(angle) > 180 - threshold) && (Math.get.abs(Math.get.abs(angle) - Math.get.abs(getHeading())) > threshold )) {
-        angleDist =  Math.abs(angle - getHeading());
-        if (angleDist > 180) {
-            angleDist = 360 - angleDist;
-        }
-        power = ((.3 * (angleDist / 180)) + 0.05);
-        
-        //TURN COUNTER CLOCKWISE
-            if (angle - getHeading() > 0 || angle - getHeading() < -180) {
-                 boat.back_left_motor.setPower(-1*power);
-                 boat.front_right_motor.setPower(power);
-                 boat.front_left_motor.setPower(-1*power);
-                 boat.back_right_motor.setPower(power);
-            } else {
-        //TURN CLOCKWISE
-                 boat.back_left_motor.setPower(power);
-                 boat.front_right_motor.setPower(-1*power);
-                 boat.front_left_motor.setPower(power);
-                 boat.back_right_motor.setPower(-1*power);
-            }
-        }
-        reset_drive();
-        busy();
-    }
-    
-    public double convertAngle(double angle) {
-        
-        rotateAngle = rotateAngle + angle;
-        
-        if (rotateAngle > 180) {
-         rotateAngle = rotateAngle - 360;
-        } else if (rotateAngle < -180) {
-         rotateAngle = rotateAngle + 360;   
-        }
-        
-        angle = angle + rotateAngle;
-        
-        if (angle > 180) {
-         angle = angle - 360;
-        } else if (angle < -180) {
-         angle = angle + 360;   
-        }
-        return angle;
-    }
+//    public float getHeading(){
+//        Orientation angles = boat.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        float heading = angles.firstAngle;
+//        float fakeHeading = heading;// - rotate_angle;
+//        return fakeHeading;
+//    }
+//
+//    public void rotate(double angle) {
+//        double threshold = 2;
+//        double power = 0;
+//        double angleDist = 0;
+//        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//
+//        angle = convertAngle(angle);
+//
+//        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold )) {
+//        angleDist =  Math.abs(angle - getHeading());
+//        if (angleDist > 180) {
+//            angleDist = 360 - angleDist;
+//        }
+//        power = ((.3 * (angleDist / 180)) + 0.05);
+//
+//        //TURN COUNTER CLOCKWISE
+//            if (angle - getHeading() > 0 || angle - getHeading() < -180) {
+//                 boat.back_left_motor.setPower(-1*power);
+//                 boat.front_right_motor.setPower(power);
+//                 boat.front_left_motor.setPower(-1*power);
+//                 boat.back_right_motor.setPower(power);
+//            } else {
+//        //TURN CLOCKWISE
+//                 boat.back_left_motor.setPower(power);
+//                 boat.front_right_motor.setPower(-1*power);
+//                 boat.front_left_motor.setPower(power);
+//                 boat.back_right_motor.setPower(-1*power);
+//            }
+//        }
+//        reset_drive();
+//        busy();
+//    }
+//
+//    public double convertAngle(double angle) {
+//
+//        rotateAngle = rotateAngle + angle;
+//
+//        if (rotateAngle > 180) {
+//         rotateAngle = rotateAngle - 360;
+//        } else if (rotateAngle < -180) {
+//         rotateAngle = rotateAngle + 360;
+//        }
+//
+//        angle = angle + rotateAngle;
+//
+//        if (angle > 180) {
+//         angle = angle - 360;
+//        } else if (angle < -180) {
+//         angle = angle + 360;
+//        }
+//        return angle;
+//    }
    
     
     public void outtake (){
