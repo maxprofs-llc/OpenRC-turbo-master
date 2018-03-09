@@ -64,6 +64,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
     boolean Shovelness = false;
     double coefficient = 1.0;
     double ProtateMultiplier = 1.0;
+    boolean lowhigh = false;
 
     //////////////////////////////////
    /* GLYPH FLIP RELATED VARIABLES */
@@ -156,20 +157,20 @@ public class ExpOnePersonTeleop extends LinearOpMode {
         }
         gyroAngle = -1 * gyroAngle;
         //MOVEMENT
-        if (gamepad1.right_trigger < 0.5) {
+        if (gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < .2) {
             theta = (Math.atan2(stick_y, stick_x) - gyroAngle) - (Math.PI / 2);
             Px = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta + Math.PI / 4));
             Py = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta - Math.PI / 4));
             coefficient = 1.0;
-        } else if (gamepad1.right_trigger > 0.5) {
+        } else if (gamepad1.right_trigger > 0.5 && gamepad1.left_trigger < .2) {
             //Runs Px Py independent of gyro (old drive) -> DOUBLE SPEED GYRO
             coefficient = 1.5;
             stick_x = stick_x * 2;
             stick_y = stick_y * 2;
-            if (gamepad1.left_bumper) {
-                stick_x = stick_x / 3;
-                stick_y = stick_y / 3;
-            }
+//            if (gamepad1.left_bumper) {
+//                stick_x = stick_x / 3;
+//                stick_y = stick_y / 3;
+//            }
             theta = (Math.atan2(stick_y, stick_x) - gyroAngle) - (Math.PI / 2);
             Px = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta + Math.PI / 4));
             Py = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta - Math.PI / 4));
@@ -177,6 +178,17 @@ public class ExpOnePersonTeleop extends LinearOpMode {
             // theta = (Math.atan2(stick_y, stick_x)) - 0; //burt is an idiot
             // Px = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta + Math.PI / 4));
             // Py = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta - Math.PI / 4));
+        }
+        else if (gamepad1.left_trigger >.2&& boat.armPotentiometer.getVoltage()<1.6){
+            stick_x = stick_x * 1/2;
+            stick_y = stick_y * 1/2;
+//            if (gamepad1.left_bumper) {
+//                stick_x = stick_x / 3;
+//                stick_y = stick_y / 3;
+//            }
+            theta = (Math.atan2(stick_y, stick_x) - gyroAngle) - (Math.PI / 2);
+            Px = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta + Math.PI / 4));
+            Py = Math.sqrt(stick_x * stick_x + stick_y * stick_y) * (Math.sin(theta - Math.PI / 4));
         }
         //ROTATION
         if (Math.abs(gamepad1.right_stick_x) > threshold) {
@@ -202,7 +214,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
                 Protate = .15;
             }
         }
-        if (gamepad1.left_trigger>.2&& boat.armPotentiometer.getVoltage()<.7) {
+        if (gamepad1.left_trigger>.2&& boat.armPotentiometer.getVoltage()<1.6) {
             ProtateMultiplier = .3;
         } else {
 
@@ -444,7 +456,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
 //    boat.glyph_flipper.setPower(0);
 //}
 //else {
-        if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage() > 2.7){
+        if (boat.armPotentiometer.getVoltage() < .002 || boat.armPotentiometer.getVoltage() > 2.7){
             boat.glyph_flipper.setPower(0);
         }else {
             if (Math.abs(desiredPosition - potValue) > .001 && opModeIsActive()) {
@@ -478,7 +490,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
                 telemetry.addData(">", "Glyph_flipper PID complete.");
             }
         }
-}
+    }
     //}
 
 
@@ -502,8 +514,8 @@ public class ExpOnePersonTeleop extends LinearOpMode {
     public void Playglyph_flipper_runToPosition(double desiredPosition, double coefficient){ //Replace later with Josh's PID loop
         double desiredTime = 20;
         double potValue = boat.armPotentiometer.getVoltage();
-        double kp = .8;   //.5              // proportional konstant
-        double ki = 0.4;    //.5         //konstant of integration
+        double kp = 1.0;   //.8              // proportional konstant
+        double ki = 0.5;    //.4         //konstant of integration
         double kd = 0.1;     //0.0 //1.7 and 3.0?      //konstant of derivation
         double current = 0;        //value to be sent to shooter motors
         double integralActiveZone = 2.0;    // zone of error values in which the total error for the                    integral term accumulates
@@ -521,41 +533,41 @@ public class ExpOnePersonTeleop extends LinearOpMode {
   power is a float declared at global level, it represents target velocity
   velocity is a float declared at global level, it is the current measured velocity of the shooter wheels
   /////////////////////////////////////////////*/
-if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage() > 2.7){
-    boat.glyph_flipper.setPower(0);
-}else {
+        if (boat.armPotentiometer.getVoltage() < .002 || boat.armPotentiometer.getVoltage() > 2.7){
+            boat.glyph_flipper.setPower(0);
+        }else {
 
-    if (Math.abs(desiredPosition - potValue) > .001 && opModeIsActive()) {
+            if (Math.abs(desiredPosition - potValue) > .001 && opModeIsActive()) {
 
-        //  drive();
-        if (error < integralActiveZone && error != 0) {// total error only accumulates where        /                                                                                            //there is error, and when the error is
-            //within the integral active zone
-            //DON'T
-            // Check for integral until you're within a certain limit
-            errorT += error;// adds error to the total each time through the loop
-        } else {
-            errorT = 0;// if error = zero or error is not withing the active zone, total       /                                                    //error is set to zero
+                //  drive();
+                if (error < integralActiveZone && error != 0) {// total error only accumulates where        /                                                                                            //there is error, and when the error is
+                    //within the integral active zone
+                    //DON'T
+                    // Check for integral until you're within a certain limit
+                    errorT += error;// adds error to the total each time through the loop
+                } else {
+                    errorT = 0;// if error = zero or error is not withing the active zone, total       /                                                    //error is set to zero
+                }
+                if (errorT > 50 / ki) { //caps total error at 50
+                    errorT = 50 / ki;
+                }
+                if (error == 0) {
+                    derivative = 0; // if error is zero derivative term is zero
+                }
+                proportion = error * kp; // sets proportion term
+                integral = errorT * ki;// sets integral term
+                derivative = (error - lastErrorGlyph) * kd;// sets derivative term
+                lastErrorGlyph = error; // sets the last error to current error so we can use it in the next loop
+                current = proportion + integral + derivative;// sets value current as total of all terms
+
+                boat.glyph_flipper.setPower(current * coefficient);
+
+                sleep(20);
+                //glyph_flipper_last_time = runtime.milliseconds();// waits so we dont hog all our CPU power or cause loop instability
+            } else {
+                telemetry.addData(">", "Glyph_flipper PID complete.");
+            }
         }
-        if (errorT > 50 / ki) { //caps total error at 50
-            errorT = 50 / ki;
-        }
-        if (error == 0) {
-            derivative = 0; // if error is zero derivative term is zero
-        }
-        proportion = error * kp; // sets proportion term
-        integral = errorT * ki;// sets integral term
-        derivative = (error - lastErrorGlyph) * kd;// sets derivative term
-        lastErrorGlyph = error; // sets the last error to current error so we can use it in the next loop
-        current = proportion + integral + derivative;// sets value current as total of all terms
-
-        boat.glyph_flipper.setPower(current * coefficient);
-
-        sleep(20);
-        //glyph_flipper_last_time = runtime.milliseconds();// waits so we dont hog all our CPU power or cause loop instability
-    } else {
-        telemetry.addData(">", "Glyph_flipper PID complete.");
-    }
-}
     }
 
     public void shovelFlip() {
@@ -589,7 +601,7 @@ if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage(
                 switchangle2 = .65;
             }
             else if (switchangle2 == .39 && Shovelness == false){
-                boat.glyph_grabber.setPosition(.24);
+                boat.glyph_grabber.setPosition(.12);
                 switchangle2 = .65;
             }
             else if (switchangle2 == .65 && Shovelness == false){
@@ -602,6 +614,16 @@ if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage(
             }
             glyph_grab_last_press_time2 = runtime.milliseconds();
 
+            if (lowhigh == true) {
+                if (boat.armPotentiometer.getVoltage() < .55) {
+                    stallShovel(.38);
+                }
+            }
+            else{
+                if (boat.armPotentiometer.getVoltage() < .55) {
+                    stallShovel(.23);
+                }
+            }
         }
 
 
@@ -629,20 +651,23 @@ if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage(
         if (gamepad2_y_toggle == true) {
 //            boat.left_intake.setPower(-.3);
 //            boat.right_intake.setPower(-.3);
-
-             if (boat.glyph_aligner.getPosition() == .7 || boat.glyph_aligner.getPosition()== .17 || boat.glyph_aligner.getPosition()== .11 || boat.glyph_aligner.getPosition()== .2) { // CHANGE THE IF STATEMENT DIM WIT
+            lowhigh = true;
+            if (boat.armPotentiometer.getVoltage() <.55){
+                stallShovel(.39);
+            }
+            else if (boat.glyph_aligner.getPosition() == .7 || boat.glyph_aligner.getPosition()== .17 || boat.glyph_aligner.getPosition()== .09 || boat.glyph_aligner.getPosition()== .2) { // CHANGE THE IF STATEMENT DIM WIT
                 Playglyph_flipper_runToPosition(.4, .8); //.45 3/7/18 OLD ONE FROM FEB 15 THAT WORKS //.438 SHOULD BE RIGHT 3/5
                 //Playglyph_flipper_runToPosition(.25, 1.0); // OLD ONE FROM FEB 15 THAT WORKS
             }
 
 
-                boat.glyph_grabber.setPosition(.65);
-                switchangle2 = .65;
-                switchangle= .65;
+            boat.glyph_grabber.setPosition(.65);
+            switchangle2 = .65;
+            switchangle= .65;
             if (boat.armPotentiometer.getVoltage()<.50){
-                    boat.glyph_aligner.setPosition(.11);
+                boat.glyph_aligner.setPosition(.09);  //.11 3/8/18
             }
-            else if (boat.armPotentiometer.getVoltage()<1.7){
+            else if (boat.armPotentiometer.getVoltage()<1.7){ //1.7 3/8/18
                 boat.glyph_aligner.setPosition(.17);    // CHANGE THE IF STATEMENT DIM WIT             // .07 3/6 march
             }
             else if (boat.armPotentiometer.getVoltage()>1.8){
@@ -684,24 +709,52 @@ if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage(
             gamepad2_a_toggle = false;
             gamepad2_x_toggle = false;
             gamepad2_y_toggle = false;
+            if (Shovelness == true){
+                if (lowhigh == true){
+                    if (switchangle == .52){
+                        boat.glyph_aligner.setPosition(.05);
+                        switchangle = .65;
+                    }
+                    else if (switchangle == .65){
+                        boat.glyph_aligner.setPosition(.23);
+                        switchangle = .52;
+                    }
+                }
+                else{
+                    if (switchangle == .52){
+                        boat.glyph_aligner.setPosition(.01);
+                        switchangle = .65;
+                    }
+                    else if (switchangle == .65){
+                        boat.glyph_aligner.setPosition(.09);
+                        switchangle = .52;
+                    }
+                }
 
-            if (switchangle == .52){
-                boat.glyph_aligner.setPosition(.11);
-                switchangle = .65;
             }
-            else if (switchangle == .65){
-                boat.glyph_aligner.setPosition(.23);
-                switchangle = .52;
+            else {
+                if (switchangle == .52){
+                    boat.glyph_aligner.setPosition(.32);
+                    switchangle = .65;
+                }
+                else if (switchangle == .65){
+                    boat.glyph_aligner.setPosition(.5);
+                    switchangle = .52;
+                }
             }
+
             glyph_grab_last_press_time = runtime.milliseconds();
+            boat.glyph_flipper.setPower(0);
 
         }
 
         if (gamepad2_x_toggle == true){
-
+            lowhigh = false;
             Shovelness = true;
-
-            if (boat.glyph_aligner.getPosition() == .7 || boat.glyph_aligner.getPosition()== .01) { // CHANGE THE IF STATEMENT DIM WIT
+            if (boat.armPotentiometer.getVoltage() <.50){
+                stallShovel(.23);
+            }
+            else if (boat.glyph_aligner.getPosition() == .7 || boat.glyph_aligner.getPosition()== .01) { // CHANGE THE IF STATEMENT DIM WIT
                 Playglyph_flipper_runToPosition(.27, .8); //.3 3/6/18 OLD ONE FROM FEB 15 THAT WORKS //.438 SHOULD BE RIGHT 3/5
                 //Playglyph_flipper_runToPosition(.25, 1.0); // OLD ONE FROM FEB 15 THAT WORKS
             }
@@ -735,12 +788,12 @@ if (boat.armPotentiometer.getVoltage() < .1 || boat.armPotentiometer.getVoltage(
 
     }
 
-public void stallShovel( double target){
+    public void stallShovel( double target){
         double currentPos = boat.armPotentiometer.getVoltage();
 
-            boat.glyph_flipper.setPower(Math.signum(currentPos - target)*((-.35/Math.sqrt(1+3000*(currentPos-target)*(currentPos-target)))+.35));
+        boat.glyph_flipper.setPower(Math.signum(currentPos - target)*((-.25/Math.sqrt(1+2000*(currentPos-target)*(currentPos-target)))+.25));
 
-}
+    }
 
     public double servoSlow(double shovelServo, double increment) {
         //double servo_angle = .84;
@@ -817,14 +870,14 @@ public void stallShovel( double target){
             boat.left_intake.setPower(1);
         }
 
-           else if (gamepad1.left_trigger>.2 && boat.armPotentiometer.getVoltage() >.8 ) {
-                boat.right_intake.setPower(-1.0);
-                boat.left_intake.setPower(-1.0);
-            } else {
-                boat.right_intake.setPower(0);
-                boat.left_intake.setPower(0);
+        else if (gamepad1.left_trigger>.2 && boat.armPotentiometer.getVoltage() >.8 ) {
+            boat.right_intake.setPower(-1.0);
+            boat.left_intake.setPower(-1.0);
+        } else {
+            boat.right_intake.setPower(0);
+            boat.left_intake.setPower(0);
 
-            }
+        }
 
     }
 
