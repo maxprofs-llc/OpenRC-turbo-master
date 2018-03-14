@@ -679,7 +679,6 @@ public class TestShovel extends LinearOpMode {
         telemetry.addData(">", "Current Angle: " + servo_angle*180);
         return servo_angle;
     }
-
     public double servoAdjustRelicArm(double servo_angle) {
 
         if (gamepad1.right_trigger>.3 && !gamepad1.right_bumper) { //CONFLICTING CONTROL KEYS

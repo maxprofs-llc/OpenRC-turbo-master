@@ -65,16 +65,15 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate");
-        relicTrackables.activate();
+        relicTrackables.activate(); //Vuforia Initialization
 
         telemetry.addData(">", "~ good ~");
         telemetry.update();
         boat.jewel_arm.setPosition(0.35);
 
         while(opModeIsActive() == false){
-            boat.relic_noose.setPosition(0);
 
-            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate); // Detect VuMark during init() period of the match
             telemetry.addData("VuMark", "%s visible", vuMark);
             if (vuMark == RelicRecoveryVuMark.RIGHT) {
                 correctCryptoSlot = "Right";
@@ -100,14 +99,15 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         pushMe();
         drive(-PI/2,6,.5);
         sleep(10000);
+
         int success = 1;
-        for(int i = 0; i < 3 && success == 1; i++){
+        for(int i = 0; i < 3 && success == 1; i++){ //detect and hit off the right jewel
             success = detect_color("RED", "CLOSE");
             telemetry.addData("Success", success);
             telemetry.update();
         }
 
-        switch(correctCryptoSlot){
+        switch(correctCryptoSlot){ //switch to correct cryptobox distance
 
             case "Center":
                 distance = 40.0; //works //works 2/15
@@ -128,31 +128,10 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
                 insanity = 22.0;
                 break;
         }
-        //waitForStart();
-        //autoGlyph();
-        //boat.glyph_aligner.setPosition(.7);
-//        correctCryptoSlot = detect_column();
-//        switch(correctCryptoSlot){
-//
-//            case "Center":
-//                distance = 40.0;
-//                shift = 7.0;
-//                break;
-//            case "Left":
-//                distance = 37 + 8.0;
-//                shift = -14.0;
-//                break;
-//            case "Right":
-//                distance = 37 - 6.0; //used to be 8
-//                shift = 14.0;
-//                break;
-//        }
-//autoGlyph();
-        //diagonal();
-//        drive(PI, 4.0, .6); //3.5 //maybe change to 1.5 worked on 2/14
-//sleep(100000);
 
-        drive(PI/2, distance, .7);
+
+
+        drive(PI/2, distance, .7); //drive to cryptobox column
         //boat.relic_flop.setPosition(.71); //open up the relic arm //.71
 
         //drive(PI/2,-32,.7);
@@ -164,38 +143,18 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
 
         sleep(100);
-        autoDetectColumn();
+        autoDetectColumn(); //self correct within column using distance sensor
         rotate_arc(-PI/1.6 + PI *10/180, .7);
         boat.winch.setPower(-.2); //set winch
-        boat.relic_noose.setPosition(1);
-        boat.glyph_aligner.setPosition(.08);
-        drive(-PI/2,10,1);
+        boat.glyph_aligner.setPosition(.08); //move shovel out of the way
 
         drive(PI/2,10,1);
         drive(PI/2,5,.5);
-        pushMe();
+        diagonal(); //score glyph diagonally
 
-//        if (correctCryptoSlot == "Left"){
-////            boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-////            boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-////            boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-////            boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-//            drive(0, -3.0, .6); //3.5 //maybe change to 1.5 worked on 2/14
-//            //drive(PI, 2.0, 1.0); //3.5 //maybe change to 1.5 worked on 2/14
-//            //drive(PI, 2.0, 1.0);
-//            //2.5 feb 15 worked ok but was off a little
-////            boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-////            boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-////            boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-////            boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        }
-        //sleep(1500);
-        //diagonal();
-        //boat.glyph_aligner.setPosition(.99);
-//        autoGlyphInsanity(insanity, center);
 
-        autoGlyph(shift, center); //START OF OLD CODE
-        drive(-PI / 2, 6, 1);
+        autoGlyph(shift, center); //try and score autonomous glyph
+        drive(-PI / 2, 6, 1); //move out of the way and park
 
     }
 
@@ -418,7 +377,8 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
         angle = convertAngle(angle);
 
-        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold ))) {
+
+        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold )) {
         angleDist =  Math.abs(angle - getHeading());
         if (angleDist > 180) {
             angleDist = 360 - angleDist;

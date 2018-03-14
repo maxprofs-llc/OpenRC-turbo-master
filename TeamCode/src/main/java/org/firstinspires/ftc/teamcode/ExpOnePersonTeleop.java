@@ -103,7 +103,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
 
         while(!opModeIsActive()){
             //boat.jewel_arm.setPosition(56.0/180.0);
-            boat.relic_flop.setPosition(.85);// keep it out of the way of the shovel
+            //boat.relic_flop.setPosition(.85);// keep it out of the way of the shovel
             boat.glyph_aligner.setPosition(.32);
             boat.jewel_arm.setPosition(0); //should be 0
             boat.glyph_grabber.setPosition(.65);
@@ -342,7 +342,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
         if (angleDist > 180) {
             angleDist = 360 - angleDist;
         }
-        ProtatePower = (1.0*((maxRotate * (angleDist / 180)) + 0.05));
+        ProtatePower = (1.4*((maxRotate * (angleDist / 180)) + 0.07));
         return ProtatePower;
     }
 
