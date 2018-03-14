@@ -69,10 +69,8 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
         telemetry.addData(">", "~ good ~");
         telemetry.update();
-        //boat.jewel_arm.setPosition(0);
         boat.jewel_arm.setPosition(0.35);
 
-        //boat.relic_flop.setPosition(.83); //was .83
         while(opModeIsActive() == false){
             boat.relic_noose.setPosition(0);
 
@@ -91,15 +89,10 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
         }
 
-//        if (correctCryptoSlot == "UNKNOWN"){
-//            correctCryptoSlot = "Right";
-//        }
-
         autoDetectColumn();
         drive(PI, 5.0, .5);
         rotate_arc(-PI/1.6 + PI *10/180, .7);
-        //boat.winch.setPower(-.2); //set winch
-        boat.relic_noose.setPosition(1.0);
+        boat.winch.setPower(-.2); //set winch
         boat.glyph_aligner.setPosition(.08);
         drive(-PI/2,5,1);
 
@@ -268,6 +261,7 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
     public void autoDetectColumn(){
         boat.jewel_arm.setPosition(.35);
+        sleep(500);
         double column_distance = boat.distance_sensor.getDistance(DistanceUnit.MM);
         double target_distance = 160.0; //this distance is how far you want the distance sensor to get to the column
         while(Math.abs(column_distance - target_distance)>2.0 && opModeIsActive()){
@@ -294,8 +288,7 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         boat.back_left_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         boat.back_right_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         boat.jewel_arm.setPosition(0);
-
-
+        sleep(500);
     }
 
 
@@ -407,68 +400,68 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         drive(PI / 2, 8, .5);
     }
     
-//    public float getHeading(){
-//        Orientation angles = boat.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//        float heading = angles.firstAngle;
-//        float fakeHeading = heading;// - rotate_angle;
-//        return fakeHeading;
-//    }
-//
-//    public void rotate(double angle) {
-//        double threshold = 2;
-//        double power = 0;
-//        double angleDist = 0;
-//        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//
-//        angle = convertAngle(angle);
-//
-//        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold )) {
-//        angleDist =  Math.abs(angle - getHeading());
-//        if (angleDist > 180) {
-//            angleDist = 360 - angleDist;
-//        }
-//        power = ((.3 * (angleDist / 180)) + 0.05);
-//
-//        //TURN COUNTER CLOCKWISE
-//            if (angle - getHeading() > 0 || angle - getHeading() < -180) {
-//                 boat.back_left_motor.setPower(-1*power);
-//                 boat.front_right_motor.setPower(power);
-//                 boat.front_left_motor.setPower(-1*power);
-//                 boat.back_right_motor.setPower(power);
-//            } else {
-//        //TURN CLOCKWISE
-//                 boat.back_left_motor.setPower(power);
-//                 boat.front_right_motor.setPower(-1*power);
-//                 boat.front_left_motor.setPower(power);
-//                 boat.back_right_motor.setPower(-1*power);
-//            }
-//        }
-//        reset_drive();
-//        busy();
-//    }
-//
-//    public double convertAngle(double angle) {
-//
-//        rotateAngle = rotateAngle + angle;
-//
-//        if (rotateAngle > 180) {
-//         rotateAngle = rotateAngle - 360;
-//        } else if (rotateAngle < -180) {
-//         rotateAngle = rotateAngle + 360;
-//        }
-//
-//        angle = angle + rotateAngle;
-//
-//        if (angle > 180) {
-//         angle = angle - 360;
-//        } else if (angle < -180) {
-//         angle = angle + 360;
-//        }
-//        return angle;
-//    }
+    public float getHeading(){
+        Orientation angles = boat.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        float heading = angles.firstAngle;
+        float fakeHeading = heading;// - rotate_angle;
+        return fakeHeading;
+    }
+
+    public void rotate(double angle) {
+        double threshold = 2;
+        double power = 0;
+        double angleDist = 0;
+        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        angle = convertAngle(angle);
+
+        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold ))) {
+        angleDist =  Math.abs(angle - getHeading());
+        if (angleDist > 180) {
+            angleDist = 360 - angleDist;
+        }
+        power = ((.3 * (angleDist / 180)) + 0.05);
+
+        //TURN COUNTER CLOCKWISE
+            if (angle - getHeading() > 0 || angle - getHeading() < -180) {
+                 boat.back_left_motor.setPower(-1*power);
+                 boat.front_right_motor.setPower(power);
+                 boat.front_left_motor.setPower(-1*power);
+                 boat.back_right_motor.setPower(power);
+            } else {
+        //TURN CLOCKWISE
+                 boat.back_left_motor.setPower(power);
+                 boat.front_right_motor.setPower(-1*power);
+                 boat.front_left_motor.setPower(power);
+                 boat.back_right_motor.setPower(-1*power);
+            }
+        }
+        reset_drive();
+        busy();
+    }
+
+    public double convertAngle(double angle) {
+
+        rotateAngle = rotateAngle + angle;
+
+        if (rotateAngle > 180) {
+         rotateAngle = rotateAngle - 360;
+        } else if (rotateAngle < -180) {
+         rotateAngle = rotateAngle + 360;
+        }
+
+        angle = angle + rotateAngle;
+
+        if (angle > 180) {
+         angle = angle - 360;
+        } else if (angle < -180) {
+         angle = angle + 360;
+        }
+        return angle;
+    }
    
     
     public void outtake (){

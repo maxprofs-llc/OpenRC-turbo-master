@@ -49,7 +49,6 @@ public class NathanPushboat
     public DcMotor right_intake = null; //(6, 2)
     public DcMotor left_intake = null; //(9, 2)
     //public DcMotor intake_aligner = null;
-    public CRServo conveyor = null;
     // public AnalogInput intakePotentiometer = null;
     public CRServo winch = null;
     //GLYPH//
@@ -63,10 +62,10 @@ public class NathanPushboat
     public DistanceSensor distance_sensor = null;
     public ColorSensor color_sensor = null;
 
-//    //RELIC//
+    //RELIC//
     public DcMotor relic_extender = null;
-    public Servo relic_flop = null;
-    public Servo relic_noose = null;
+    public Servo relic_flipper = null;
+    public Servo relic_grabber = null;
 
     //IMU//
     BNO055IMU imu;
@@ -97,7 +96,6 @@ public class NathanPushboat
         right_intake = hwMap.dcMotor.get("right_intake");
         left_intake = hwMap.dcMotor.get("left_intake");
         //intake_aligner = hwMap.dcMotor.get("intake_aligner");
-        conveyor = hwMap.crservo.get("conveyor");
         winch = hwMap.crservo.get("winch");
         //intakePotentiometer = hwMap.analogInput.get("intakePotentiometer");
         //GLYPH//
@@ -113,11 +111,11 @@ public class NathanPushboat
 
 //        //RELIC//
         relic_extender  = hwMap.dcMotor.get("relic_extender");
-        relic_flop   = hwMap.servo.get("relic_grabber");
-        relic_noose = hwMap.servo.get("relic_finger");
+        relic_flipper   = hwMap.servo.get("relic_flipper");
+        relic_grabber = hwMap.servo.get("relic_grabber");
         relic_extender.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         relic_extender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //relic_retracter = hwMap.crservo.get("relic_retractor");
+
         //IMU//
         imu = hwMap.get(BNO055IMU.class, "imu");
 
@@ -166,18 +164,15 @@ public class NathanPushboat
 //        intake_aligner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        intake_aligner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        conveyor.setPower(0);
-
-        /* VUFORIA STUFF */
+    }
+    public void imu(){
+        /* IMU STUFF */
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-        /* IMU STUFF */
+        parameters.loggingEnabled      = false;
         imu.initialize(parameters);
     }
 
