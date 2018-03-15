@@ -15,6 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class RelicTeleop extends LinearOpMode {
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
+    double relic_grabberAngle = 0.2;
+    double relic_flipperAngle = 0.5;
+    double lastFlipTime = 0;
     //////////////////////
     /* TOGGLE VARIABLES */
     //////////////////////
@@ -23,7 +26,6 @@ public class RelicTeleop extends LinearOpMode {
     @Override
     public void runOpMode() {
         boat.init(hardwareMap);
-        boat.relic_grabber.setPosition(0);
         boat.front_left_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         boat.front_right_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         boat.back_left_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -37,35 +39,45 @@ public class RelicTeleop extends LinearOpMode {
         }
         while(opModeIsActive()){
             relicSlide();
-            testServo(); 
+            relicGrabber(); 
+            relicFlipper();
             telemetry.update();//THIS GOES AT THE END
         }
     }
     public void relicSlide(){
         if(gamepad2.left_stick_y > 0.1){
-            boat.relic_extender.setPower(-gamepad2.left_stick_y);
+            boat.relic_extender.setPower(gamepad2.left_stick_y);
         }
         else if(gamepad2.left_stick_y < -0.1){
-            boat.relic_extender.setPower(-gamepad2.left_stick_y);
+            boat.relic_extender.setPower(gamepad2.left_stick_y);
         }
         else{
             boat.relic_extender.setPower(0);
         }
     }
-    public void testServo(){
+    public void relicGrabber(){
         if(gamepad2.dpad_up){
-            boat.relic_grabber.setPosition(boat.relic_grabber.getPosition() + 1.0);
+            boat.relic_grabber.setPosition(0.21);
         }
-        if(gamepad2.dpad_down){
-            boat.relic_grabber.setPosition(boat.relic_grabber.getPosition() - 1.0);
+        else{
+            boat.relic_grabber.setPosition(0.40);
         }
-        if(gamepad2.right_stick_y > 0.1){
-            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() + 1.0);
+    }
+    public void relicFlipper(){
+        if(gamepad2.right_stick_y > 0.1 && runtime.milliseconds() - lastFlipTime > 25){
+            lastFlipTime = runtime.milliseconds();
+            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() + 0.02);
         }
-        else if(gamepad2.right_stick_y < -0.1){
-            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() - 1.0);
+        else if(gamepad2.right_stick_y < -0.1 && runtime.milliseconds() - lastFlipTime > 25){
+            lastFlipTime = runtime.milliseconds();
+            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() - 0.02);
+        }
+        if(gamepad2.right_stick_x > 0.8){
+            boat.relic_flipper.setPosition(0.10);
+        }
+        if(gamepad2.right_stick_x < -0.8){
+            boat.relic_flipper.setPosition(0.86);
         }
         telemetry.addData("uwu", boat.relic_flipper.getPosition());
-        telemetry.addData("uwu", boat.relic_grabber.getPosition());
     }
 }
