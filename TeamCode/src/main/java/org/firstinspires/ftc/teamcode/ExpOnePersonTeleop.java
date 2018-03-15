@@ -82,7 +82,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
     double errorServo = .835; //could be .26
     double firstError;
     double shovel_time = 0;
-
+double lastPosition = 0;
     /////////////////////////////////
    /* RELIC RELATED VARIABLES */
     //////////////////////////////////
@@ -242,10 +242,10 @@ public class ExpOnePersonTeleop extends LinearOpMode {
             boat.front_left_motor.setPower(coefficient*.3 + Protate);
             boat.back_right_motor.setPower(coefficient*.3 - Protate);
         } else if (gamepad1.dpad_up && !gamepad1.right_bumper && !gamepad1.right_bumper) {
-            boat.back_left_motor.setPower(coefficient*.6 + Protate);
-            boat.front_right_motor.setPower(coefficient*.6 - Protate);
-            boat.front_left_motor.setPower(coefficient*.6 + Protate);
-            boat.back_right_motor.setPower(coefficient*.6 - Protate);
+            boat.back_left_motor.setPower(coefficient*.2 + Protate);
+            boat.front_right_motor.setPower(coefficient*.2 - Protate);
+            boat.front_left_motor.setPower(coefficient*.2 + Protate);
+            boat.back_right_motor.setPower(coefficient*.2 - Protate);
             boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -598,6 +598,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
 
             if (switchangle2 == .39 && Shovelness== true){
                 boat.glyph_grabber.setPosition(.65);
+                boat.glyph_aligner.setPosition(boat.glyph_aligner.getPosition() - .05);//added new line
                 switchangle2 = .65;
             }
             else if (switchangle2 == .39 && Shovelness == false){
@@ -618,6 +619,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
                 if (boat.armPotentiometer.getVoltage() < .55) {
                     stallShovel(.38);
                 }
+
             }
             else{
                 if (boat.armPotentiometer.getVoltage() < .55) {
@@ -850,26 +852,16 @@ public class ExpOnePersonTeleop extends LinearOpMode {
 
     }
 
-    public void Conveyor (){ // works
-        if (gamepad2_y_toggle == false && killUrself == false) {
-            if (gamepad2.left_trigger > 0.5) {
-                boat.conveyor.setPower(0);
-            } else if (gamepad2.left_bumper) {
-                boat.conveyor.setPower(10);
-            } else {
-                boat.conveyor.setPower(-10);
-            }
-        } else if (killUrself == true) {
-            boat.conveyor.setPower(0);
-        }
-    }
-
+    
     public void intakeSimple() {
         if (gamepad1.left_trigger>.3 && gamepad1.left_bumper) { //intake
             boat.right_intake.setPower(1);
             boat.left_intake.setPower(1);
         }
-
+        else if (gamepad1.left_trigger>.2 && gamepad1.a ) {
+            boat.right_intake.setPower(-1.0);
+            boat.left_intake.setPower(.5);
+        }
         else if (gamepad1.left_trigger>.2 && boat.armPotentiometer.getVoltage() >.8 ) {
             boat.right_intake.setPower(-1.0);
             boat.left_intake.setPower(-1.0);
@@ -1010,6 +1002,29 @@ public class ExpOnePersonTeleop extends LinearOpMode {
         telemetry.addData("Arm Pot",  value);
         //telemetry.addData("intake Pot", intakevalue);
     }
+public void fixDiagonal(){
+    if (gamepad1.left_trigger>.3 && gamepad1.left_bumper) { //intake
+
+        if (Math.abs(boat.left_intake.getCurrentPosition() - lastPosition) < 50) {
+            boat.right_intake.setPower(1);
+            boat.left_intake.setPower(-1);
+            lastPosition = boat.left_intake.getCurrentPosition();
+            sleep(100);
+        } else {
+            boat.left_intake.setPower(1);
+            boat.right_intake.setPower(1);
+        }
+    }
+    else if (gamepad1.left_trigger>.2 && boat.armPotentiometer.getVoltage() >.8 ) {
+        boat.right_intake.setPower(-1.0);
+        boat.left_intake.setPower(-1.0);
+    } else {
+        boat.right_intake.setPower(0);
+        boat.left_intake.setPower(0);
+
+    }
+}
+
 
     public boolean toggle(boolean variable){ //Takes a boolean variable then swaps its trueness
         if(variable == true){
