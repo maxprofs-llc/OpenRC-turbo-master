@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name="RedClose_Luke", group="Pushbot")
-public class RedClose_Luke extends LinearOpMode{
+@Autonomous(name="RedClose_Charlotte", group="Pushbot")
+public class RedClose_Charlotte extends LinearOpMode{
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
     VuforiaLocalizer vuforia;
@@ -113,10 +113,10 @@ public class RedClose_Luke extends LinearOpMode{
         outtake();
         switch(correctCryptoSlot){
             case "Right":
-                drive(0, -7, .8);
+                drive(0, -7, 1);
                 break;
             case "Left":
-                drive(PI, -10, .8);
+                drive(PI, -10, 1);
                 break;
         }
         
