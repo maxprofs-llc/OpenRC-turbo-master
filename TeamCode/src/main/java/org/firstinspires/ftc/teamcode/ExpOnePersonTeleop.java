@@ -49,7 +49,7 @@ public class ExpOnePersonTeleop extends LinearOpMode {
     float stick_x = 0;
     float stick_y = 0;
     double gyroAngle = 0;
-    float rotate_angle = 0;
+    float rotate_angle = 0; //Change this
     double theta = 0;
     double Px = 0;
     double Py = 0;
@@ -86,10 +86,11 @@ double lastPosition = 0;
     /////////////////////////////////
    /* RELIC RELATED VARIABLES */
     //////////////////////////////////
-
-    boolean relicNooseGrabbed = true;
-    boolean relicFlopDown = true;
-
+    boolean relicMode = false;
+    boolean gamepad1_b_relic_toggle = false;
+    double gamepad1_b_relic_toggle_time = 0;
+    double gamepad1_start_relic_toggle_time = 0;
+    double lastFlipTime = 0;
     @Override
     public void runOpMode() {
         boat.init(hardwareMap);
@@ -98,12 +99,15 @@ double lastPosition = 0;
         boat.front_right_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         boat.back_left_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         boat.back_right_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("uwu", "Nathan is stupid, loading imu :(");
+        telemetry.update();
+        boat.imu();
         telemetry.addData("NO", "Nathan Boat 1.0 without crossbow is ready to be sailed!");
         telemetry.update();
 
         while(!opModeIsActive()){
             //boat.jewel_arm.setPosition(56.0/180.0);
-            //boat.relic_flop.setPosition(.85);// keep it out of the way of the shovel
+
             boat.glyph_aligner.setPosition(.32);
             boat.jewel_arm.setPosition(0); //should be 0
             boat.glyph_grabber.setPosition(.65);
@@ -116,17 +120,22 @@ double lastPosition = 0;
             } else {
                 boat.winch.setPower(0);
             }
-
-            //Relic();
+            relicModeToggle();
+            relicSlide();
+            relicFlipperNoRelicMode();
+            if(relicMode == true){
+                relic();
+            }
+            else{
+                glyph_flip();
+            }
             jewel_arm();
             telemetry.addData(">", "Current Angle: " + boat.glyph_aligner.getPosition());
             telemetry.addData("Distance (mm)",
                     String.format( "%.02f", boat.distance_sensor.getDistance(DistanceUnit.MM)));
             intake(); // this encompasses all intake functions necessary
             getPotValues();
-            glyph_flip();
             drive();
-            Relic();
             killUrself();
             telemetry.update();//THIS GOES AT THE END
         }
@@ -222,7 +231,7 @@ double lastPosition = 0;
         }
 
 
-        if (gamepad1.dpad_down && !gamepad1.right_bumper && !gamepad1.right_bumper) {
+        if (gamepad1.dpad_down && !gamepad1.right_bumper && !gamepad1.right_bumper && !relicMode) {
             boat.back_left_motor.setPower(coefficient*-.5 + Protate);
             boat.front_right_motor.setPower(coefficient*-.5 - Protate);
             boat.front_left_motor.setPower(coefficient*-.5 + Protate);
@@ -231,17 +240,17 @@ double lastPosition = 0;
             boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             boat.back_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             boat.back_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        } else if (gamepad1.dpad_left && !gamepad1.right_bumper && !gamepad1.right_bumper) {
+        } else if (gamepad1.dpad_left && !gamepad1.right_bumper && !gamepad1.right_bumper && !relicMode) {
             boat.back_left_motor.setPower(coefficient*.3 + Protate);
             boat.front_right_motor.setPower(coefficient*.3 - Protate);
             boat.front_left_motor.setPower(coefficient*-.3 + Protate);
             boat.back_right_motor.setPower(coefficient*-.3 - Protate);
-        } else if (gamepad1.dpad_right && !gamepad1.right_bumper && !gamepad1.right_bumper) {
+        } else if (gamepad1.dpad_right && !gamepad1.right_bumper && !gamepad1.right_bumper && !relicMode) {
             boat.back_left_motor.setPower(coefficient*-.3 + Protate);
             boat.front_right_motor.setPower(coefficient*-.3 - Protate);
             boat.front_left_motor.setPower(coefficient*.3 + Protate);
             boat.back_right_motor.setPower(coefficient*.3 - Protate);
-        } else if (gamepad1.dpad_up && !gamepad1.right_bumper && !gamepad1.right_bumper) {
+        } else if (gamepad1.dpad_up && !gamepad1.right_bumper && !gamepad1.right_bumper && !relicMode) {
             boat.back_left_motor.setPower(coefficient*.2 + Protate);
             boat.front_right_motor.setPower(coefficient*.2 - Protate);
             boat.front_left_motor.setPower(coefficient*.2 + Protate);
@@ -271,7 +280,7 @@ double lastPosition = 0;
     public void rotateToAngle() { //updated move to angle
         int threshold = 1;
         double desiredRunTime = 5000;
-        double incorrectHeading = getHeading();
+        float incorrectHeading = getHeading();
 //        if (gamepad1.a) {
 //            moveAngle = 180;
 //            currentTimeForAngle = runtime.milliseconds();
@@ -288,47 +297,47 @@ double lastPosition = 0;
         }
         if (moveAngle != 9001 && runtime.milliseconds() > currentTimeForAngle && runtime.milliseconds() < currentTimeForAngle + desiredRunTime) {
             if (moveAngle == 0) {
-                if (getHeading() <= 0 - threshold) {
+                if (incorrectHeading <= 0 - threshold) {
                     //rotate left
-                    Protate = -1 * scaleProtate(moveAngle, getHeading());
-                } else if (getHeading() > 0 + threshold) {
+                    Protate = -1 * scaleProtate(moveAngle, incorrectHeading);
+                } else if (incorrectHeading > 0 + threshold) {
                     //rotate right
-                    Protate = scaleProtate(moveAngle, getHeading());
+                    Protate = scaleProtate(moveAngle, incorrectHeading);
                 } else {
                     moveAngle = 9001;
                 }
             }
             if (moveAngle == -90) {
-                if (-90 - threshold < getHeading() && getHeading() < -90 + threshold) {
+                if (-90 - threshold < incorrectHeading && incorrectHeading < -90 + threshold) {
                     moveAngle = 9001;
-                } else if (Math.abs(getHeading()) >= 90) {
+                } else if (Math.abs(incorrectHeading) >= 90) {
                     //rotate left
-                    Protate = -1 * scaleProtate(moveAngle, getHeading());
-                } else if (Math.abs(getHeading()) < 90) {
+                    Protate = -1 * scaleProtate(moveAngle, incorrectHeading);
+                } else if (Math.abs(incorrectHeading) < 90) {
                     //rotate right
-                    Protate = scaleProtate(moveAngle, getHeading());
+                    Protate = scaleProtate(moveAngle, incorrectHeading);
                 }
             }
             if (moveAngle == 90) {
-                if (90 - threshold < getHeading() && getHeading() < 90 + threshold) {
+                if (90 - threshold < incorrectHeading && incorrectHeading < 90 + threshold) {
                     moveAngle = 9001;
-                } else if (Math.abs(getHeading()) <= 90) {
+                } else if (Math.abs(incorrectHeading) <= 90) {
                     //rotate left
-                    Protate = -1 * scaleProtate(moveAngle, getHeading());
-                } else if (Math.abs(getHeading()) > 90) {
+                    Protate = -1 * scaleProtate(moveAngle, incorrectHeading);
+                } else if (Math.abs(incorrectHeading) > 90) {
                     //rotate right
-                    Protate = scaleProtate(moveAngle, getHeading());
+                    Protate = scaleProtate(moveAngle, incorrectHeading);
                 }
             }
             if (moveAngle == 180) {
-                if (180 - threshold < getHeading() || getHeading() < -180 + threshold) {
+                if (180 - threshold < incorrectHeading || incorrectHeading < -180 + threshold) {
                     moveAngle = 9001;
-                } else if (getHeading() >= 0) {
+                } else if (incorrectHeading >= 0) {
                     //rotate left
-                    Protate = -1 * scaleProtate(moveAngle, getHeading());
-                } else if (getHeading() < 0) {
+                    Protate = -1 * scaleProtate(moveAngle, incorrectHeading);
+                } else if (incorrectHeading < 0) {
                     //rotate right
-                    Protate = scaleProtate(moveAngle, getHeading());
+                    Protate = scaleProtate(moveAngle, incorrectHeading);
                 }
             }
         }
@@ -925,40 +934,6 @@ double lastPosition = 0;
         }
     }
 
-
-    public void Relic(){
-        if (gamepad2.right_trigger>0.2){ //extend linear slide
-            boat.relic_extender.setPower(-gamepad2.right_trigger);
-        } else if (gamepad2.left_trigger>0.2){
-            boat.relic_extender.setPower(gamepad2.left_trigger);
-        } else if (gamepad1.right_stick_button) {
-            boat.relic_extender.setPower(-.2);
-        } else if (gamepad1.left_stick_button) {
-            boat.relic_extender.setPower(.2);
-        }  else{
-            boat.relic_extender.setPower(0);
-        }
-
-//        if (gamepad1.b){ //toggle noose
-//            if (relicNooseGrabbed) {
-//                boat.relic_noose.setPosition(0); //grab
-//                relicNooseGrabbed = false;
-//            } else {
-//                boat.relic_noose.setPosition(1); //let go
-//                relicNooseGrabbed = true;
-//            }
-//        }
-        if (gamepad1.x){ //toggle flop
-            if (relicFlopDown) {
-                boat.relic_flop.setPosition(.285); //up
-                relicFlopDown = false;
-            } else {
-                boat.relic_flop.setPosition(0.19); //down
-                relicFlopDown = true;
-            }
-        }
-
-    }
     public void winch() {
         if(Math.abs(gamepad2.right_stick_y)>.2) {
             boat.winch.setPower(gamepad2.right_stick_y);
@@ -1025,7 +1000,86 @@ public void fixDiagonal(){
     }
 }
 
-
+/////////////////////
+// RELIC ////////////
+/////////////////////
+    public void relicModeToggle(){
+        if(gamepad1.right_stick_button && runtime.milliseconds() - gamepad1_start_relic_toggle_time > 200){
+            gamepad1_start_relic_toggle_time = runtime.milliseconds();
+            relicMode = toggle(relicMode);
+        }
+        if(relicMode){
+            telemetry.addData(">", "RELIC MODE | A C T I V A T E D |");
+            telemetry.addData(">", "THE POWERS OF THE RELICS HAVE BESTOWED THEIR POWER UPON YOU. USE IT WISELY.");
+        }
+        else if(!relicMode){
+            telemetry.addData(">", "GLYPH MODE | A C T I V A T E D |");
+            telemetry.addData(">", "USE YOUR INVESTIGATION SKILLS TO UNLOCK THE MYSTERY BEHIND THE GLYPHS.");
+        }
+        telemetry.addData("relicMode", relicMode);
+    }
+    public void relic(){
+        relicGrabber();
+        relicFlipper();
+    }
+    public void relicSlide(){ //Sliiiiides
+        if(gamepad2.left_stick_y > 0.1){
+            boat.relic_extender.setPower(gamepad2.left_stick_y);
+        }
+        else if(gamepad2.left_stick_y < -0.1){
+            boat.relic_extender.setPower(gamepad2.left_stick_y);
+        }
+        else{
+            
+            boat.relic_extender.setPower(0);
+        }
+    }
+    public void relicGrabber(){ //Opens and closes the relic grabber
+        if(gamepad1.b && relicMode && runtime.milliseconds() - gamepad1_b_relic_toggle_time > 350){
+            gamepad1_b_relic_toggle_time = runtime.milliseconds();
+            gamepad1_b_relic_toggle = toggle(gamepad1_b_relic_toggle);
+        }
+        if(gamepad1_b_relic_toggle){
+            boat.relic_grabber.setPosition(0.19); //Open
+        }
+        else if(!gamepad1_b_relic_toggle){
+            boat.relic_grabber.setPosition(0.40); //Closed
+        }
+    }
+    public void relicFlipper(){ //Has the ability to adjust and set to specific positions
+        if(gamepad1.dpad_up && runtime.milliseconds() - lastFlipTime > 25){
+            lastFlipTime = runtime.milliseconds();
+            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() + 0.03);
+        }
+        else if(gamepad1.dpad_down && runtime.milliseconds() - lastFlipTime > 25){
+            lastFlipTime = runtime.milliseconds();
+            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() - 0.03);
+        }
+        if(gamepad1.y){
+            boat.relic_flipper.setPosition(0.10); //High
+        }
+        if(gamepad1.a){
+            boat.relic_flipper.setPosition(0.86); //Low
+        }
+        telemetry.addData("uwu", boat.relic_flipper.getPosition());
+    }
+    public void relicFlipperNoRelicMode(){ //Has the ability to adjust and set to specific positions
+        if(gamepad2.dpad_up && runtime.milliseconds() - lastFlipTime > 25){
+            lastFlipTime = runtime.milliseconds();
+            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() + 0.03);
+        }
+        else if(gamepad2.dpad_down && runtime.milliseconds() - lastFlipTime > 25){
+            lastFlipTime = runtime.milliseconds();
+            boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() - 0.03);
+        }
+        if(gamepad2.y){
+            boat.relic_flipper.setPosition(0.10); //High
+        }
+        if(gamepad2.a){
+            boat.relic_flipper.setPosition(0.86); //Low
+        }
+        telemetry.addData("uwu", boat.relic_flipper.getPosition());
+    }
     public boolean toggle(boolean variable){ //Takes a boolean variable then swaps its trueness
         if(variable == true){
             variable = false;

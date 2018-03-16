@@ -250,7 +250,6 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         sleep(500);
     }
 
-
     public void autoGlyphAdwith(double distance, double center){
         drive(-PI / 2, 11, 1);
         rotate_arc(PI + PI* 25/180, 1);

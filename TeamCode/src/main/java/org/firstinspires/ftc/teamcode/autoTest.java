@@ -86,34 +86,27 @@ public class AutoTest extends LinearOpMode{
         boat.winch.setPower(-0.1);
         drive(PI/2, 16, 1);
         boat.winch.setPower(-0.01);
+        rotate(90);
         switch(correctCryptoSlot){
             case "Left":
-
+                drive(PI/2, 11 + 8, 1);
                 break;
             case "Center":
-                drive(PI, 14, 1);
+                drive(PI/2, 11, 1);
                 break;
             case "Right":
-
+                drive(PI/2, 11 - 8, 1);
                 break;
         }
-        /*
-        rotate(90);
+        
+        drive(0, 2.5, 1);
         autoDetectColumn();
+        drive(PI, 3.5, 1);
         rotate(0);
         sleep(50);
         rotate(0);
-        /*
-        drive(PI/2, 5, 1);
+        drive(PI, 4, 1);
         outtake();
-        switch(correctCryptoSlot){
-            case "Right":
-                drive(0, -7, 1);
-                break;
-            case "Left":
-                drive(PI, -10, 1);
-                break;
-        }
         
         
         /*
@@ -172,13 +165,17 @@ public class AutoTest extends LinearOpMode{
         telemetry.addData("uwu", getHeading());
         telemetry.update();
     }
-    public void outtake (){
+    public void outtake (){ //Diferent from close maps
         boat.right_intake.setPower(-.4);
         boat.left_intake.setPower(.1);
-        sleep(700);
-        drive(-PI / 2, 10, 0.6);
+        sleep(1000);
+        drive(-PI / 2, 1.5, 0.4);
+        boat.right_intake.setPower(-.1);
+        boat.left_intake.setPower(.1);
+        drive(PI / 2, 10, 0.6);
         boat.right_intake.setPower(0);
         boat.left_intake.setPower(0);
+        drive(-PI / 2, 6, 0.6);
     }
     public void autoDetectColumn(){
         boat.jewel_arm.setPosition(.26);
@@ -279,7 +276,7 @@ public class AutoTest extends LinearOpMode{
         telemetry.addData("uwu", angle);
         telemetry.update();
         double rotateStartTime = runtime.milliseconds();
-        while (((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold))) && runtime.milliseconds() - rotateStartTime < (35 * Math.abs(angle))) {
+        while (((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold))) && runtime.milliseconds() - rotateStartTime < 6000) {
             angleDist =  Math.abs(angle - getHeading());
             if (angleDist > 180) {
                 angleDist = 360 - angleDist;

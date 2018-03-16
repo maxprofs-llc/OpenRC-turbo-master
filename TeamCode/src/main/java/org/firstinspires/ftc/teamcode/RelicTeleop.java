@@ -44,7 +44,7 @@ public class RelicTeleop extends LinearOpMode {
             telemetry.update();//THIS GOES AT THE END
         }
     }
-    public void relicSlide(){
+    public void relicSlide(){ //Sliiiiides
         if(gamepad2.left_stick_y > 0.1){
             boat.relic_extender.setPower(gamepad2.left_stick_y);
         }
@@ -55,7 +55,7 @@ public class RelicTeleop extends LinearOpMode {
             boat.relic_extender.setPower(0);
         }
     }
-    public void relicGrabber(){
+    public void relicGrabber(){ //Opens and closes the relic grabber
         if(gamepad2.dpad_up){
             boat.relic_grabber.setPosition(0.21);
         }
@@ -63,7 +63,7 @@ public class RelicTeleop extends LinearOpMode {
             boat.relic_grabber.setPosition(0.40);
         }
     }
-    public void relicFlipper(){
+    public void relicFlipper(){ //Has the ability to adjust and set to specific positions
         if(gamepad2.right_stick_y > 0.1 && runtime.milliseconds() - lastFlipTime > 25){
             lastFlipTime = runtime.milliseconds();
             boat.relic_flipper.setPosition(boat.relic_flipper.getPosition() + 0.02);
