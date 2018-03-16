@@ -607,7 +607,7 @@ double lastPosition = 0;
 
             if (switchangle2 == .39 && Shovelness== true){
                 boat.glyph_grabber.setPosition(.65);
-                boat.glyph_aligner.setPosition(boat.glyph_aligner.getPosition() - .05);//added new line
+                //boat.glyph_aligner.setPosition(boat.glyph_aligner.getPosition() - .05);//added new line
                 switchangle2 = .65;
             }
             else if (switchangle2 == .39 && Shovelness == false){

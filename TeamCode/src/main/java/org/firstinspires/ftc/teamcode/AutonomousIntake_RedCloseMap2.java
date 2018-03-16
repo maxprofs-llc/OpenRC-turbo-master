@@ -42,6 +42,9 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
     final float values[] = hsvValues;
     final double scale_factor = 255;
     double rotateAngle = 0;
+    double lastErrorGlyph = 0;
+    double shovel_time = 0;
+
     @Override
     public void runOpMode() {
 
@@ -305,6 +308,9 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
 
 
     }
+
+
+
     public void rotate_arc (double angle, double power) {
         ///CCW IS POSITIVE
 
@@ -745,4 +751,172 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
             telemetry.update();
         }
     }
+
+    public void glyph_low(){
+
+        while (Math.abs(boat.armPotentiometer.getVoltage() - .27) > .1 && opModeIsActive()) { // you need to change the .1 for accuracy. Smaller == more accurate but my PID isn't that accurate
+            //.1 is the threshold of that this loop will exit. the pot ranges from 0-3.3 over the course of 270 degrees
+            if (boat.armPotentiometer.getVoltage() < .50) {
+                stallShovel(.23);
+            } else if (boat.glyph_aligner.getPosition() == .7 || boat.glyph_aligner.getPosition() == .01) { // CHANGE THE IF STATEMENT DIM WIT
+                Playglyph_flipper_runToPosition(.27, .8); //.3 3/6/18 OLD ONE FROM FEB 15 THAT WORKS //.438 SHOULD BE RIGHT 3/5
+                //Playglyph_flipper_runToPosition(.25, 1.0); // OLD ONE FROM FEB 15 THAT WORKS
+            }
+
+            boat.glyph_grabber.setPosition(.65);
+            if (boat.armPotentiometer.getVoltage() < 1.7) {
+                boat.glyph_aligner.setPosition(.01);    // CHANGE THE IF STATEMENT DIM WIT             // .01 3/6 march
+            } else if (boat.armPotentiometer.getVoltage() > 1.8) {
+                boat.glyph_aligner.setPosition(.70);
+            }
+        }
+    }
+
+    public void glyph_release(){
+        boat.glyph_grabber.setPosition(.4);
+    }
+
+    
+
+    public void glyph_load(){
+        while (Math.abs(boat.armPotentiometer.getVoltage()-2.3)>.1 && opModeIsActive()) { // i think the PID thinks it's going to 2.4, but the ideal position is 2.2 so you gotta toy with 2.3 and .1 here
+
+
+            glyph_flipper_runToPosition(2.40, .3);//2.29 3/6/18
+
+            if (boat.armPotentiometer.getVoltage() > 2.0) {
+                boat.glyph_grabber.setPosition(.36); //.28 3/6/18
+                boat.glyph_aligner.setPosition(.32); //.38 3/6/18
+
+            } else {
+                boat.glyph_aligner.setPosition(.5); //.38 3/6/18
+
+            }
+        }
+    }
+
+    public void stallShovel( double target){
+        double currentPos = boat.armPotentiometer.getVoltage();
+
+        boat.glyph_flipper.setPower(Math.signum(currentPos - target)*((-.25/Math.sqrt(1+2000*(currentPos-target)*(currentPos-target)))+.25));
+
+    }
+
+    public void glyph_flipper_runToPosition(double desiredPosition, double coefficient){ //Replace later with Josh's PID loop
+        double desiredTime = 20;
+        double potValue = boat.armPotentiometer.getVoltage();
+        double kp = .8;   //.8 3/6/18         // proportional konstant
+        double ki = 0.345;    //.345 3/6/18         //konstant of integration
+        double kd = 0.2;     //.2 //1.7 and 3.0?      //konstant of derivation
+        double current = 0;        //value to be sent to shooter motors
+        double integralActiveZone = 2.0;    // zone of error values in which the total error for the                    integral term accumulates
+        double errorT = 0;                        // total error accumulated
+        //double lastError = 0;                    // last error recorded by the controller
+        double proportion;                        // the proportional term
+        double integral;                            // the integral term
+        double derivative;
+        double error = potValue - desiredPosition;
+        shovel_time = runtime.milliseconds();
+// the derivative term
+/*////////////////////////////////////////////////////////
+  NOTE:
+  Error is a float declared at global level, it represents the difference between target velocity and current velocity
+  power is a float declared at global level, it represents target velocity
+  velocity is a float declared at global level, it is the current measured velocity of the shooter wheels
+  /////////////////////////////////////////////*/
+//if (current >.2 && Math.abs(error-lastErrorGlyph) < .1 && runtime.milliseconds() > (shovel_time + 500)){
+//    shovel_time = runtime.milliseconds();
+//    boat.glyph_flipper.setPower(0);
+//}
+//else {
+        if (boat.armPotentiometer.getVoltage() < .002 || boat.armPotentiometer.getVoltage() > 2.7){
+            boat.glyph_flipper.setPower(0);
+        }else {
+
+                //  drive();
+                if (error < integralActiveZone && error != 0) {// total error only accumulates where        /                                                                                            //there is error, and when the error is
+                    //within the integral active zone
+                    //DON'T
+                    // Check for integral until you're within a certain limit
+                    errorT += error;// adds error to the total each time through the loop
+                } else {
+                    errorT = 0;// if error = zero or error is not withing the active zone, total       /                                                    //error is set to zero
+                }
+                if (errorT > 50 / ki) { //caps total error at 50
+                    errorT = 50 / ki;
+                }
+                if (error == 0) {
+                    derivative = 0; // if error is zero derivative term is zero
+                }
+                proportion = error * kp; // sets proportion term
+                integral = errorT * ki;// sets integral term
+                derivative = (error - lastErrorGlyph) * kd;// sets derivative term
+                lastErrorGlyph = error; // sets the last error to current error so we can use it in the next loop
+                current = proportion + integral + derivative;// sets value current as total of all terms
+
+                boat.glyph_flipper.setPower(current * coefficient);
+
+                sleep(20);
+                //glyph_flipper_last_time = runtime.milliseconds();// waits so we dont hog all our CPU power or cause loop instability
+            }
+
+    }
+
+    public void Playglyph_flipper_runToPosition(double desiredPosition, double coefficient){ //Replace later with Josh's PID loop
+        double desiredTime = 20;
+        double potValue = boat.armPotentiometer.getVoltage();
+        double kp = 1.0;   //.8              // proportional konstant
+        double ki = 0.5;    //.4         //konstant of integration
+        double kd = 0.1;     //0.0 //1.7 and 3.0?      //konstant of derivation
+        double current = 0;        //value to be sent to shooter motors
+        double integralActiveZone = 2.0;    // zone of error values in which the total error for the                    integral term accumulates
+        double errorT = 0;                        // total error accumulated
+        //double lastError = 0;                    // last error recorded by the controller
+        double proportion;                        // the proportional term
+        double integral;                            // the integral term
+        double derivative;
+        double error = potValue - desiredPosition;
+
+// the derivative term
+/*////////////////////////////////////////////////////////
+  NOTE:
+  Error is a float declared at global level, it represents the difference between target velocity and current velocity
+  power is a float declared at global level, it represents target velocity
+  velocity is a float declared at global level, it is the current measured velocity of the shooter wheels
+  /////////////////////////////////////////////*/
+        if (boat.armPotentiometer.getVoltage() < .002 || boat.armPotentiometer.getVoltage() > 2.7){
+            boat.glyph_flipper.setPower(0);
+        }else {
+
+
+
+                //  drive();
+                if (error < integralActiveZone && error != 0) {// total error only accumulates where        /                                                                                            //there is error, and when the error is
+                    //within the integral active zone
+                    //DON'T
+                    // Check for integral until you're within a certain limit
+                    errorT += error;// adds error to the total each time through the loop
+                } else {
+                    errorT = 0;// if error = zero or error is not withing the active zone, total       /                                                    //error is set to zero
+                }
+                if (errorT > 50 / ki) { //caps total error at 50
+                    errorT = 50 / ki;
+                }
+                if (error == 0) {
+                    derivative = 0; // if error is zero derivative term is zero
+                }
+                proportion = error * kp; // sets proportion term
+                integral = errorT * ki;// sets integral term
+                derivative = (error - lastErrorGlyph) * kd;// sets derivative term
+                lastErrorGlyph = error; // sets the last error to current error so we can use it in the next loop
+                current = proportion + integral + derivative;// sets value current as total of all terms
+
+                boat.glyph_flipper.setPower(current * coefficient);
+
+                sleep(20);
+                //glyph_flipper_last_time = runtime.milliseconds();// waits so we dont hog all our CPU power or cause loop instability
+            }
+
+    }
+
 }
