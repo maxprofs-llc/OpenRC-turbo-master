@@ -43,7 +43,7 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
     final double scale_factor = 255;
     double rotateAngle = 0;
     double lastErrorGlyph = 0;
-    double shovel_time = 0;
+    double shovel_time = 0; 
 
     @Override
     public void runOpMode() {
@@ -752,6 +752,8 @@ public class AutonomousIntake_RedCloseMap extends LinearOpMode {
         }
     }
 
+               
+               
     public void glyph_low(){
 
         while (Math.abs(boat.armPotentiometer.getVoltage() - .27) > .1 && opModeIsActive()) { // you need to change the .1 for accuracy. Smaller == more accurate but my PID isn't that accurate

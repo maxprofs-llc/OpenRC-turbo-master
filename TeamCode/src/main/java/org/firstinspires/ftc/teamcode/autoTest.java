@@ -78,36 +78,102 @@ public class AutoTest extends LinearOpMode{
         boat.jewel_arm.setPosition(0);
         int success = 1;
         for(int i = 0; i < 3 && success == 1; i++){
-            success = detect_color("RED", "FAR");
+            success = detect_color("RED", "CLOSE");
             telemetry.addData("Success", success);
             telemetry.update();
         }
         drive(PI/2, 10, .4); //Drives off platform
         boat.winch.setPower(-0.1);
-        drive(PI/2, 16, 1);
-        boat.winch.setPower(-0.01);
-        rotate(90);
         switch(correctCryptoSlot){
-            case "Left":
-                drive(PI/2, 11 + 8, 1);
+            case "Right":
+                drive(PI/2, 27-6, 1);
                 break;
             case "Center":
-                drive(PI/2, 11, 1);
+                drive(PI/2, 27, 1);
                 break;
+            case "Left":
+                drive(PI/2, 27+10, 1); //Be careful it's super close to hitting blue
+                break;
+        }
+        boat.winch.setPower(-0.01);
+        if(getHeading() > 3){ //Adjusts if robot is too angled left
+            drive(0, 2, 1);
+        }
+        if(getHeading() < -3){ //Adjusts if robot is too angled right
+            drive(PI, 2, 1);
+        }
+        rotate(0);
+        autoDetectColumn();
+        drive(PI, 7.5, 1); //Adjusts to make room for rotate
+        rotate(-90); //Duh, rotates
+        sleep(50);
+        rotate(-90);
+        drive(PI, 7, 1);
+        drive(PI/2, 5, 1);
+        outtake();
+        switch(correctCryptoSlot){
             case "Right":
-                drive(PI/2, 11 - 8, 1);
+                drive(0, -7, 1);
+                break;
+            case "Left":
+                drive(PI, -10, 1);
                 break;
         }
         
-        drive(0, 2.5, 1);
-        autoDetectColumn();
-        drive(PI, 3.5, 1);
-        rotate(0);
-        sleep(50);
-        rotate(0);
-        drive(PI, 4, 1);
-        outtake();
+        ////////////////////////////////////////////////////////////
+        // S E C O N D    G L Y P H /\/\ S E C O N D    G L Y P H \\
+        // S T A R T /\/\ S T A R T /\/\ S T A R T /\/\ S T A R T \\
+        // S E C O N D    G L Y P H /\/\ S E C O N D    G L Y P H \\
+        ////////////////////////////////////////////////////////////
+
+        //rotate(90);
+        boat.winch.setPower(-0.1);
+        rotate_arc(PI + PI* 25/180, 1);
+        boat.right_intake.setPower(-1);
+        boat.left_intake.setPower(1);
+        drive(PI/2, 7, 1);
+        boat.right_intake.setPower(.3);
+        boat.left_intake.setPower(-.3);
+        drive(PI/2, 10, 0.8);
+        rotate_arc(PI/6, 1);
+        drive(PI/2, 8, 0.8);
+        drive(-PI/2, 16, 1);
+        boat.right_intake.setPower(.4);
+        boat.left_intake.setPower(-.4);
+        rotate(-90);
         
+        //Back in front of center column at this point
+        switch(correctCryptoSlot){
+            case "Right":
+                drive(0, 2.5, 1);
+                break;
+            case "Center":
+                drive(PI, 2, 1);
+                break;
+            case "Left":
+                drive(0, 2.5, 1);
+                break;
+        }
+        drive(PI/2, 16, 1);
+        outtake();
+        if(runtime.milliseconds() - startTime < 27750){ //Checks if it'll have time to do stuff
+            switch(correctCryptoSlot){
+                case "Right":
+                    drive(0, 5.5, 1); 
+                    break;
+                case "Center":
+                    drive(0, 5.5, 1);
+                    break;
+                case "Left":
+                    drive(PI, 5.5, 1);
+                    break;
+            }
+            drive(PI/2, 3, 1);
+            drive(PI/2, 14, 0.6);
+            drive(-PI/2, 7, 1);
+        }
+        else{
+        }
         
         /*
         */
@@ -165,17 +231,13 @@ public class AutoTest extends LinearOpMode{
         telemetry.addData("uwu", getHeading());
         telemetry.update();
     }
-    public void outtake (){ //Diferent from close maps
+    public void outtake (){
         boat.right_intake.setPower(-.4);
         boat.left_intake.setPower(.1);
-        sleep(1000);
-        drive(-PI / 2, 1.5, 0.4);
-        boat.right_intake.setPower(-.1);
-        boat.left_intake.setPower(.1);
-        drive(PI / 2, 10, 0.6);
+        sleep(700);
+        drive(-PI / 2, 10, 0.6);
         boat.right_intake.setPower(0);
         boat.left_intake.setPower(0);
-        drive(-PI / 2, 6, 0.6);
     }
     public void autoDetectColumn(){
         boat.jewel_arm.setPosition(.26);
@@ -275,8 +337,7 @@ public class AutoTest extends LinearOpMode{
         boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         telemetry.addData("uwu", angle);
         telemetry.update();
-        double rotateStartTime = runtime.milliseconds();
-        while (((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold))) && runtime.milliseconds() - rotateStartTime < 6000) {
+        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold ))) {
             angleDist =  Math.abs(angle - getHeading());
             if (angleDist > 180) {
                 angleDist = 360 - angleDist;
@@ -312,8 +373,6 @@ public class AutoTest extends LinearOpMode{
                 telemetry.addData("uwu", "Else");
             }
             telemetry.addData("uwu", angle - getHeading());
-            telemetry.addData("uwu", runtime.milliseconds() - rotateStartTime);
-            telemetry.addData("uwu", 35 * Math.abs(angle));
             telemetry.update();
         }
         boat.back_left_motor.setPower(0);
