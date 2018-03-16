@@ -12,11 +12,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@TeleOp(name="ExpPersonTeleop", group="Pushbot")
-public class ExpOnePersonTeleop extends LinearOpMode {
+@TeleOp(name="RedFar_Tunaop", group="TunaOps")
+public class RedFar_Tunaop extends LinearOpMode {
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
-    float rotate_angle = 0; //Change this
+    float rotate_angle = 90; //Change this
     //////////////////////
    /* TOGGLE VARIABLES */
     //////////////////////

@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name="BlueClose_Charlotte", group="Charlotte Autonomae")
-public class BlueClose_Charlotte extends LinearOpMode{
+@Autonomous(name="BlueFar_Charlotte", group="Charlotte Autonomae")
+public class BlueFar_Charlotte extends LinearOpMode{
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
     VuforiaLocalizer vuforia;
@@ -34,7 +34,7 @@ public class BlueClose_Charlotte extends LinearOpMode{
         telemetry.update();
         boat.init(hardwareMap);
         
-        AutoTransitioner.transitionOnStop(this, "Close_Tunaop");
+        AutoTransitioner.transitionOnStop(this, "BlueFar_Tunaop");
         
         boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -75,111 +75,44 @@ public class BlueClose_Charlotte extends LinearOpMode{
         // S T A R T /\/\ S T A R T /\/\ S T A R T /\/\ S T A R T \\
         ////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////
-        
+
         double startTime = runtime.milliseconds();
         boat.jewel_arm.setPosition(0);
         int success = 1;
         for(int i = 0; i < 3 && success == 1; i++){
-            success = detect_color("BLUE", "CLOSE");
+            success = detect_color("BLUE", "FAR");
             telemetry.addData("Success", success);
             telemetry.update();
         }
-        drive(-PI/2, 6, .4); //Drives off platform
-        boat.winch.setPower(-0.25);
-        switch(correctCryptoSlot){
-            case "Left":
-                drive(-PI/2, 31.5-8, 1);
-                break;
-            case "Center":
-                drive(-PI/2, 31.5, 1);
-                break;
-            case "Right":
-                drive(-PI/2, 31.5+8, 1); //Be careful it's super close to hitting blue
-                break;
-        }
+        drive(-PI/2, 10, .4); //Drives off platform
+        boat.winch.setPower(-0.1);
+        drive(-PI/2, 16, 1);
         boat.winch.setPower(-0.01);
-        if(getHeading() > 3){ //Adjusts if robot is too angled left
-            drive(0, 2, 1);
-        }
-        if(getHeading() < -3){ //Adjusts if robot is too angled right
-            drive(PI, 2, 1);
-        }
-        drive(0, 2, 1);
-        rotate(0);
-        autoDetectColumn();
-        drive(PI, 7.5, 1); //Adjusts to make room for rotate
-        rotate(-90); //Duh, rotates
+        rotate(-90);
         sleep(50);
         rotate(-90);
-        drive(PI, 5.5, 1);
-        drive(PI/2, 5, 1);
-        outtake();
         switch(correctCryptoSlot){
             case "Right":
-                drive(0, -7, 1);
-                break;
-            case "Left":
-                drive(PI, -10, 1);
-                break;
-        }
-        
-        ////////////////////////////////////////////////////////////
-        // S E C O N D    G L Y P H /\/\ S E C O N D    G L Y P H \\
-        // S T A R T /\/\ S T A R T /\/\ S T A R T /\/\ S T A R T \\
-        // S E C O N D    G L Y P H /\/\ S E C O N D    G L Y P H \\
-        ////////////////////////////////////////////////////////////
-
-        //rotate(90);
-        boat.winch.setPower(-0.1);
-        rotate_arc(PI + PI* 25/180, 1);
-        boat.right_intake.setPower(-1);
-        boat.left_intake.setPower(1);
-        drive(PI/2, 7, 1);
-        boat.right_intake.setPower(.3);
-        boat.left_intake.setPower(-.3);
-        drive(PI/2, 10, 0.8);
-        rotate_arc(PI/6, 1);
-        drive(PI/2, 8, 0.8);
-        drive(-PI/2, 16, 1);
-        boat.right_intake.setPower(.4);
-        boat.left_intake.setPower(-.4);
-        rotate(-90);
-        
-        //Back in front of center column at this point
-        switch(correctCryptoSlot){
-            case "Left":
-                drive(0, 2.5, 1);
+                drive(-PI/2, 11 + 8, 1);
                 break;
             case "Center":
-                drive(PI, 2, 1);
+                drive(-PI/2, 11, 1);
                 break;
-            case "Right":
-                drive(0, 2.5, 1);
+            case "Left":
+                drive(-PI/2, 11 - 8, 1);
                 break;
         }
-        drive(PI/2, 16, 1);
+        
+        drive(0, 2.5, 1);
+        autoDetectColumn();
+        drive(PI, 3.5, 1);
+        stupidRotate(180);
+        sleep(50);
+        stupidRotate(180);
+        drive(PI, 4, 1);
         outtake();
-        if(runtime.milliseconds() - startTime < 27750){ //Checks if it'll have time to do stuff
-            switch(correctCryptoSlot){
-                case "Right":
-                    drive(0, 5.5, 1); 
-                    break;
-                case "Center":
-                    drive(0, 5.5, 1);
-                    break;
-                case "Left":
-                    drive(PI, 5.5, 1);
-                    break;
-            }
-            drive(PI/2, 3, 1);
-            drive(PI/2, 14, 0.6);
-            drive(-PI/2, 7, 1);
-        }
-        else{
-        }
-        if(runtime.milliseconds() - startTime < 29750){
-            rotate(-90);
-        }
+        stupidRotate(180);
+        
         /*
         */
     }
@@ -236,13 +169,17 @@ public class BlueClose_Charlotte extends LinearOpMode{
         telemetry.addData("uwu", getHeading());
         telemetry.update();
     }
-    public void outtake (){
+    public void outtake (){ //Diferent from close maps
         boat.right_intake.setPower(-.4);
         boat.left_intake.setPower(.1);
-        sleep(700);
-        drive(-PI / 2, 10, 0.6);
+        sleep(1000);
+        drive(-PI / 2, 1.5, 0.4);
+        boat.right_intake.setPower(-.1);
+        boat.left_intake.setPower(.1);
+        drive(PI / 2, 10, 0.6);
         boat.right_intake.setPower(0);
         boat.left_intake.setPower(0);
+        drive(-PI / 2, 6, 0.6);
     }
     public void autoDetectColumn(){
         boat.jewel_arm.setPosition(.26);
@@ -343,7 +280,7 @@ public class BlueClose_Charlotte extends LinearOpMode{
         telemetry.addData("uwu", angle);
         telemetry.update();
         double rotateStartTime = runtime.milliseconds();
-        while (((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold))) && runtime.milliseconds() - rotateStartTime < (35 * Math.abs(angle))) {
+        while (((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold))) && runtime.milliseconds() - rotateStartTime < 6000) {
             angleDist =  Math.abs(angle - getHeading());
             if (angleDist > 180) {
                 angleDist = 360 - angleDist;
@@ -382,6 +319,57 @@ public class BlueClose_Charlotte extends LinearOpMode{
             telemetry.addData("uwu", runtime.milliseconds() - rotateStartTime);
             telemetry.addData("uwu", 35 * Math.abs(angle));
             telemetry.update();
+        }
+        boat.back_left_motor.setPower(0);
+        boat.front_right_motor.setPower(0);
+        boat.front_left_motor.setPower(0);
+        boat.back_right_motor.setPower(0);
+        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+public void stupidRotate(double angle) { //Only use for 180
+        double threshold = 1;
+        double power = 0;
+        double angleDist = 0;
+        sleep(200);
+        boat.back_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.back_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.front_right_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        telemetry.addData("uwu", angle);
+        telemetry.update();
+        double rotateStartTime = runtime.milliseconds();
+        while(angle - Math.abs(getHeading()) > threshold){
+        //TURN COUNTER CLOCKWISE
+            if(Math.abs(angle - getHeading()) > 50){
+                power = 0.3;
+            }
+            else if(Math.abs(angle - getHeading()) > 30){
+                power = 0.2;
+            }
+            else if(Math.abs(angle - getHeading()) > 15){
+                power = 0.15;
+            }
+            else{
+                power = 0.1;
+            }
+            if (getHeading() > 0) {
+                boat.back_left_motor.setPower(-1*power);
+                boat.front_right_motor.setPower(power);
+                boat.front_left_motor.setPower(-1*power);
+                boat.back_right_motor.setPower(power);
+                telemetry.addData("uwu", "If");
+            } else {
+        //TURN CLOCKWISE
+                boat.back_left_motor.setPower(power);
+                boat.front_right_motor.setPower(-1*power);
+                boat.front_left_motor.setPower(power);
+                boat.back_right_motor.setPower(-1*power);
+                telemetry.addData("uwu", "Else");
+            }
         }
         boat.back_left_motor.setPower(0);
         boat.front_right_motor.setPower(0);

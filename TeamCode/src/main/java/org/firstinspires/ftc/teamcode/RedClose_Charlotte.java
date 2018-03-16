@@ -20,19 +20,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name="RedClose_Charlotte", group="Pushbot")
+@Autonomous(name="RedClose_Charlotte", group="Charlotte Autonomae")
 public class RedClose_Charlotte extends LinearOpMode{
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
     VuforiaLocalizer vuforia;
     double rotateAngle = 0;
     double PI = Math.PI;
-    String correctCryptoSlot = "Right";
+    String correctCryptoSlot = "Center";
     @Override
     public void runOpMode(){
         telemetry.addData("uwu", "Wait");
         telemetry.update();
         boat.init(hardwareMap);
+        
+        AutoTransitioner.transitionOnStop(this, "Close_Tunaop");
         
         boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -86,13 +88,13 @@ public class RedClose_Charlotte extends LinearOpMode{
         boat.winch.setPower(-0.1);
         switch(correctCryptoSlot){
             case "Right":
-                drive(PI/2, 27-6, 1);
+                drive(PI/2, 29-8, 1);
                 break;
             case "Center":
-                drive(PI/2, 27, 1);
+                drive(PI/2, 29, 1);
                 break;
             case "Left":
-                drive(PI/2, 27+10, 1); //Be careful it's super close to hitting blue
+                drive(PI/2, 29+8, 1); //Be careful it's super close to hitting blue
                 break;
         }
         boat.winch.setPower(-0.01);
@@ -108,7 +110,7 @@ public class RedClose_Charlotte extends LinearOpMode{
         rotate(-90); //Duh, rotates
         sleep(50);
         rotate(-90);
-        drive(PI, 7, 1);
+        drive(PI, 5.5, 1);
         drive(PI/2, 5, 1);
         outtake();
         switch(correctCryptoSlot){
@@ -148,7 +150,7 @@ public class RedClose_Charlotte extends LinearOpMode{
                 drive(0, 2.5, 1);
                 break;
             case "Center":
-                drive(PI, 2, 1);
+                drive(PI, 4, 1);
                 break;
             case "Left":
                 drive(0, 2.5, 1);
@@ -174,7 +176,9 @@ public class RedClose_Charlotte extends LinearOpMode{
         }
         else{
         }
-        
+        if(runtime.milliseconds() - startTime < 29750){
+            rotate(-90);
+        }
         /*
         */
     }
@@ -337,7 +341,8 @@ public class RedClose_Charlotte extends LinearOpMode{
         boat.front_left_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         telemetry.addData("uwu", angle);
         telemetry.update();
-        while ((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold ))) {
+        double rotateStartTime = runtime.milliseconds();
+        while (((Math.abs(angle - getHeading()) > threshold) || ((Math.abs(angle) > 180 - threshold) && (Math.abs(Math.abs(angle) - Math.abs(getHeading())) > threshold))) && runtime.milliseconds() - rotateStartTime < 6000) {
             angleDist =  Math.abs(angle - getHeading());
             if (angleDist > 180) {
                 angleDist = 360 - angleDist;

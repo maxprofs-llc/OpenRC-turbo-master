@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name="RedClose_Charlotte", group="Pushbot")
-public class RedClose_Charlotte extends LinearOpMode{
+@Autonomous(name="RedFar_Charlotte", group="Charlotte Autonomae")
+public class RedFar_Charlotte extends LinearOpMode{
     NathanPushboat boat = new NathanPushboat();
     private ElapsedTime runtime = new ElapsedTime();
     VuforiaLocalizer vuforia;
@@ -33,6 +33,8 @@ public class RedClose_Charlotte extends LinearOpMode{
         telemetry.addData("uwu", "Wait");
         telemetry.update();
         boat.init(hardwareMap);
+        
+        AutoTransitioner.transitionOnStop(this, "RedFar_Tunaop");
         
         boat.front_left_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         boat.front_right_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -107,7 +109,7 @@ public class RedClose_Charlotte extends LinearOpMode{
         rotate(0);
         drive(PI, 4, 1);
         outtake();
-        
+        rotate(0);
         
         /*
         */
