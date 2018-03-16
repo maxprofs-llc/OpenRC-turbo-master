@@ -108,7 +108,7 @@ public class AutoTest extends LinearOpMode{
         rotate(-90); //Duh, rotates
         sleep(50);
         rotate(-90);
-        drive(PI, 7, 1);
+        drive(PI, 6.5, 1);
         drive(PI/2, 5, 1);
         outtake();
         switch(correctCryptoSlot){
@@ -148,7 +148,7 @@ public class AutoTest extends LinearOpMode{
                 drive(0, 2.5, 1);
                 break;
             case "Center":
-                drive(PI, 2, 1);
+                drive(PI, 3, 1);
                 break;
             case "Left":
                 drive(0, 2.5, 1);
@@ -174,7 +174,7 @@ public class AutoTest extends LinearOpMode{
         }
         else{
         }
-        
+        rotate(-90);
         /*
         */
     }
